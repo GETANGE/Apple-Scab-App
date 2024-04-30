@@ -1,7 +1,6 @@
 import React from 'react';
-import { SafeAreaView, View, Text, Image, StyleSheet, StatusBar, TextInput, TouchableOpacity } from 'react-native';
-import { Fontisto } from '@expo/vector-icons';
-import { SimpleLineIcons } from '@expo/vector-icons';
+import { SafeAreaView, View, Text, Image, StyleSheet, StatusBar, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import { FontAwesome } from '@expo/vector-icons';
 
 const LoginScreen = () => {
     const [email, onChangeEmail] = React.useState('');
@@ -9,7 +8,8 @@ const LoginScreen = () => {
 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.content}>
+            <ScrollView style={styles.ScrollView}>
+                <View style={styles.content}>
                 <Image
                     source={require('../../assets/login.png')}
                     style={styles.image}
@@ -19,7 +19,7 @@ const LoginScreen = () => {
                 <View style={styles.form}>
                     <View style={styles.inputContainer}>
                         <View style={styles.iconContainer}>
-                            <Fontisto name="email" size={24} color="green" />
+                            <FontAwesome name="envelope" size={24} color="green" />
                             <Text style={styles.label}>Email</Text>
                         </View>
                         <TextInput
@@ -32,7 +32,7 @@ const LoginScreen = () => {
                     </View>
                     <View style={styles.inputContainer}>
                         <View style={styles.iconContainer}>
-                            <SimpleLineIcons name="lock" size={24} color="green" />
+                            <FontAwesome name="lock" size={24} color="green" />
                             <Text style={styles.label}>Password</Text>
                         </View>
                         <TextInput
@@ -52,8 +52,9 @@ const LoginScreen = () => {
                 >
                     <Text style={styles.buttonText}>Login</Text>
                 </TouchableOpacity>
-                <Text style={styles.textSign} >Don't have an account? Sign up</Text>
+                <Text style={styles.textSign} >Don't have an account? <Text style={styles.textColor2}>Sign up</Text></Text>
             </View>
+            </ScrollView>
         </SafeAreaView>
     );
 }
@@ -119,10 +120,10 @@ const styles = StyleSheet.create({
     },
     button: {
         backgroundColor: 'green',
-        marginTop: 20,
+        marginTop: 55,
         paddingVertical: 10,
         paddingHorizontal: 20,
-        borderRadius: 8,
+        borderRadius: 20,
         width: '100%', // Adjust the width as needed
         alignItems: 'center', // Center the content horizontally
     },
@@ -134,6 +135,17 @@ const styles = StyleSheet.create({
     textSign:{
         color: 'grey',
         marginTop: 10
+    },
+    ScrollView:{
+        width: '100%',
+        height: '100%',
+        marginTop: 50
+    },
+    textColor2:{
+        color: 'green',
+        fontSize: 16,
+        fontWeight: 'bold',
+        textDecorationLine: 'underline'
     }
 });
 
