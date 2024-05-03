@@ -6,6 +6,8 @@ import ForgotPassword from './src/screens/forgotpass';
 import ResetPassword from './src/screens/resetpass';
 import WelcomePage from './src/screens/welcome';
 import Description from './src/screens/description';
+import Setting from './src/screens/settings';
+import Home from './src/screens/HomeScreen';
 
 export default function App() {
   return (
@@ -15,7 +17,9 @@ export default function App() {
           {/* <ForgotPassword/> */}
           {/* <ResetPassword/> */}
           {/* <WelcomePage/> */}
-          <Description/>
+          {/* <Description/> */}
+          {/* <Setting/> */}
+          <Home/>
     </View>
   );
 }

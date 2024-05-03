@@ -6,10 +6,10 @@ const WelcomePage = () => {
         <SafeAreaView style={styles.container}>
             <View style={styles.content}>
                 <Text style={styles.title}>Wambugu Farm Apple-Scab Disease Detection System</Text>
-                <Image
+                {/* <Image
                     source={require('../../assets/Welcome.png')}
                     style={styles.image}
-                />
+                /> */}
                 <TouchableOpacity
                     style={styles.button}
                     onPress={() => console.log('Logged in')}

@@ -1,5 +1,5 @@
 import React from "react";
-import { SafeAreaView, View, Text, StyleSheet, ScrollView, Image, FlatList} from "react-native";
+import { SafeAreaView, View, Text, StyleSheet, Image, FlatList} from "react-native";
 
 const DATA =[
     "Olive-green to black lesions on leaves, fruit and twigs",

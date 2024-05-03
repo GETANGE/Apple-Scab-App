@@ -1,5 +1,6 @@
 import React from "react";
 import {View, Text, SafeAreaView, ScrollView, TextInput, StyleSheet, TouchableOpacity} from "react-native";
+import CustomButton from "../components/CustomButton";
 import { FontAwesome } from '@expo/vector-icons';
 
 const SingUp =()=>{
@@ -71,13 +72,10 @@ const SingUp =()=>{
                             />
                         </View>
                         <Text style={Styles.textColor1}>By signing you agree to our <Text style={Styles.textColor2}>Terms of use and privacy notice</Text></Text>
-
-                        <TouchableOpacity
-                            style={Styles.button}
-                            onPress={() => console.log('signed in')}
-                        >
-                            <Text style={Styles.buttonText}>Sign Up</Text>
-                        </TouchableOpacity>
+                            <CustomButton
+                                onPress={()=>console.log('Signed up')}
+                                buttonText="Sign Up"
+                            />
                         <Text style={Styles.textSign} >Already have an account? <Text style={Styles.textColor2}>Sign in</Text></Text>
                     </View>
                 </View>
@@ -146,20 +144,6 @@ const Styles = StyleSheet.create({
     forget: {
         color: 'green',
         marginLeft: 200
-    },
-    button: {
-        backgroundColor: 'green',
-        marginTop: 45,
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        borderRadius: 20,
-        width: '100%', // Adjust the width as needed
-        alignItems: 'center', // Center the content horizontally
-    },
-    buttonText: {
-        color: '#fff',
-        fontSize: 18,
-        fontWeight: 'bold',
     },
     textSign:{
         color: 'grey',
