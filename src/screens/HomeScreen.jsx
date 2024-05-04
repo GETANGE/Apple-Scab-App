@@ -1,16 +1,36 @@
 import React from 'react';
-import { SafeAreaView, View, Text, StyleSheet , Image, Pressable, label} from 'react-native';
+import { useState } from 'react';
+import { SafeAreaView, View, Text, StyleSheet , Image, Pressable, Modal, Button, Alert} from 'react-native';
 import { SimpleLineIcons, AntDesign, Fontisto, Foundation, FontAwesome5} from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 
 const Home = () => {
-    return (
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [showModal, setShowModal] = useState(false);
+
+    // Function to pick image from gallery
+    const pickImageAsync = async () => {
+        let result = await ImagePicker.launchImageLibraryAsync({
+            allowsEditing: true,
+            quality: 1
+        });
+        if (!result.canceled) {
+            setSelectedImage(result.uri);
+            setShowModal(true);
+        } else {
+            alert('You did not select any image.');
+        }
+    };
+
+return (
         <SafeAreaView style={styles.container}>
-        <Text style={styles.profile}>Hello, Emmanuel</Text>
+            <Text style={styles.profile}>Hello, Emmanuel</Text>
             <View style={styles.content}>
+                {/* Home Card */}
                 <View style={styles.card}>
                     <View style={styles.homeCard}>
                         <Text style={styles.text}>Welcome to Apple-apple-scab Disease detection system!</Text>
-                        <Text style={styles.text}>Upload or snap an Image for instant analysis.Let's grow together</Text>
+                        <Text style={styles.text}>Upload or snap an Image for instant analysis. Let's grow together</Text>
                     </View>
                     <View>
                         <Image
@@ -19,39 +39,45 @@ const Home = () => {
                         />
                     </View>
                 </View>
+
+                {/* Button Icons */}
                 <Text style={styles.profile2}>Heal your crops</Text>
                 <View style={styles.iconInputContainer}>
+                    {/* Take a picture */}
                     <View style={styles.icon}>
                         <SimpleLineIcons name="camera" size={24} color="green" />
                         <Text>Take a picture</Text>
                     </View>
                     <AntDesign name="arrowright" size={20} color="black" />
-                    <View>
-                        <View style={styles.icon}>
-                            <Fontisto name="test-tube" size={24} color="green" />
-                            <Text>See a diagnosis</Text>
-                        </View>
+
+                    {/* See a diagnosis */}
+                    <View style={styles.icon}>
+                        <Fontisto name="test-tube" size={24} color="green" />
+                        <Text>See a diagnosis</Text>
                     </View>
                     <AntDesign name="arrowright" size={20} color="black" />
-                    <View>
-                        <View style={styles.icon}>
-                            <Foundation name="clipboard-notes" size={24} color="green" />
-                            <Text>Get a recommendation</Text>
-                        </View>
+
+                    {/* Get a recommendation */}
+                    <View style={styles.icon}>
+                        <Foundation name="clipboard-notes" size={24} color="green" />
+                        <Text>Get a recommendation</Text>
                     </View>
                 </View>
+
+                {/* Upload Photo Buttons */}
                 <View style={styles.card2}>
-                    {/* Left button */}
+                    {/* Take a photo button */}
                     <View style={styles.buttonContainer}>
-                        <FontAwesome5 name="camera" size={24} color="green" style={styles.icon2}/>
-                        <Pressable onPress={() => alert('You pressed a button.')} style={styles.button}>
+                        <FontAwesome5 name="camera" size={24} color="green" style={styles.icon2} />
+                        <Pressable onPress={pickImageAsync} style={styles.button}>
                             <Text style={styles.buttonText}>Take a photo</Text>
                         </Pressable>
                     </View>
-                    {/* Right button */}
+
+                    {/* Upload a photo button */}
                     <View style={styles.buttonContainer}>
                         <FontAwesome5 name="upload" size={24} color="green" style={styles.icon2} />
-                        <Pressable onPress={() => alert('You pressed a button.')} style={styles.button}>
+                        <Pressable onPress={() => setShowModal(true)} style={styles.button}>
                             <Text style={styles.buttonText}>Upload a photo</Text>
                         </Pressable>
                     </View>
@@ -67,14 +93,14 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         width: '100%',
         height: '100%',
-        marginTop: 40
+        //marginTop: 40
     },
     content: {
         flex: 1,
         alignItems: 'center',
         // justifyContent: 'center', // Center vertically
         alignItems: 'center', // Center horizontally
-        marginTop: 30
+        marginTop: 5,
     },
     card: {
         flexDirection: 'row', // Arrange children horizontally
@@ -123,7 +149,7 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: 'bold',
         color: 'green',
-        marginTop:25,
+        marginTop:5,
         marginRight:210
     },
     icon:{
@@ -147,7 +173,7 @@ const styles = StyleSheet.create({
         width: 350,
         alignItems: "center",
         justifyContent: "center",
-        marginTop: 20,
+        marginTop: 10,
         marginBottom: 40
     },
     buttonContainer: {
@@ -173,6 +199,18 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         marginLeft: 50
+    },
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    modalImage: {
+        width: 300,
+        height: 300,
+        borderRadius: 10,
+        marginBottom: 10,
     },
 });
 
