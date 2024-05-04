@@ -1,8 +1,6 @@
 import React from 'react';
-import { SafeAreaView, View, Text, StyleSheet , Image} from 'react-native';
-import { SimpleLineIcons, AntDesign, Fontisto, Foundation} from '@expo/vector-icons';
-import Button from '../components/Button';
-
+import { SafeAreaView, View, Text, StyleSheet , Image, Pressable, label} from 'react-native';
+import { SimpleLineIcons, AntDesign, Fontisto, Foundation, FontAwesome5} from '@expo/vector-icons';
 
 const Home = () => {
     return (
@@ -43,15 +41,19 @@ const Home = () => {
                     </View>
                 </View>
                 <View style={styles.card2}>
-                    <View>
-                        <Button
-                            label="Take a photo"
-                        />
+                    {/* Left button */}
+                    <View style={styles.buttonContainer}>
+                        <FontAwesome5 name="camera" size={24} color="green" style={styles.icon2}/>
+                        <Pressable onPress={() => alert('You pressed a button.')} style={styles.button}>
+                            <Text style={styles.buttonText}>Take a photo</Text>
+                        </Pressable>
                     </View>
-                    <View>
-                        <Button
-                            label="Upload a photo"
-                        />
+                    {/* Right button */}
+                    <View style={styles.buttonContainer}>
+                        <FontAwesome5 name="upload" size={24} color="green" style={styles.icon2} />
+                        <Pressable onPress={() => alert('You pressed a button.')} style={styles.button}>
+                            <Text style={styles.buttonText}>Upload a photo</Text>
+                        </Pressable>
                     </View>
                 </View>
             </View>
@@ -92,7 +94,7 @@ const styles = StyleSheet.create({
         borderColor: 'green',
         width: 350,
         height:150,
-        //flexDirection: 'row'
+        flexDirection: 'row',
     },
     text: {
         fontSize: 16,
@@ -147,6 +149,30 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         marginTop: 20,
         marginBottom: 40
+    },
+    buttonContainer: {
+        flex: 1, // Take up equal space
+        marginHorizontal: 5, // Add some space between buttons
+        marginTop: 30,
+        width:'50%'
+    },
+    button: { 
+        backgroundColor: 'green', 
+        borderRadius: 5, 
+        padding: 10, 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height:39,
+    },
+    buttonText: {
+        color: '#fff',
+        fontSize: 16,
+    },
+    icon2: {
+        marginBottom: 10, // Add some space between icon and button text
+        alignItems: "center",
+        justifyContent: "center",
+        marginLeft: 50
     },
 });
 
