@@ -1,14 +1,40 @@
 import React from 'react';
-import { SafeAreaView, View, Text, Image, StyleSheet, StatusBar, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import { SafeAreaView, View, Text, Image, StyleSheet, TextInput, TouchableOpacity, ScrollView , Alert} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { FontAwesome } from '@expo/vector-icons';
+import { useState } from 'react';
+import axios from 'axios';
 
-const LoginScreen = () => {
-    const [email, onChangeEmail] = React.useState('');
-    const [password, onChangePassword] = React.useState('');
+const LoginScreen = ({props}) => {
+    const navigation = useNavigation();
+
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+
+    function handleSubmit() {
+        const userData = {
+            email: email,
+            password: password,
+        };
+        axios.post("https://apple-plant-disease.onrender.com/api/v1/user/login", userData)
+        .then(res => {
+            console.log(JSON.stringify(res.data, null, 2));
+
+            if (res.data.status === 'success') {
+                Alert.alert("Success", "Logged in successfully");
+                navigation.navigate('Tabs');
+            }
+            
+        })
+        .catch(error => {
+            console.error('Error:', error.response.data);
+            Alert("Login failed. Please check your credentials.");
+        });
+    }
 
     return (
         <SafeAreaView style={styles.container}>
-            <ScrollView style={styles.ScrollView}>
+            <ScrollView style={styles.ScrollView} keyboardShouldPersistTaps="always">
                 <View style={styles.content}>
                 <Image
                     source={require('../../assets/login.png')}
@@ -27,8 +53,9 @@ const LoginScreen = () => {
                             placeholder="Enter your email"
                             placeholderTextColor="grey"
                             value={email}
-                            onChangeText={onChangeEmail}
+                            onChangeText={setEmail} 
                         />
+
                     </View>
                     <View style={styles.inputContainer}>
                         <View style={styles.iconContainer}>
@@ -40,7 +67,7 @@ const LoginScreen = () => {
                             placeholder="Enter your password"
                             placeholderTextColor="grey"
                             value={password}
-                            onChangeText={onChangePassword}
+                            onChangeText={setPassword}
                             secureTextEntry
                         />
                     </View>
@@ -48,7 +75,7 @@ const LoginScreen = () => {
                 <Text style={styles.forget}>Forgot Password?</Text>
                 <TouchableOpacity
                     style={styles.button}
-                    onPress={() => console.log('Logged in')}
+                    onPress={() => handleSubmit()}
                 >
                     <Text style={styles.buttonText}>Login</Text>
                 </TouchableOpacity>

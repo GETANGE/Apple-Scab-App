@@ -19,31 +19,31 @@ const ResetPassword = () => {
                     <Text style={styles.title}>Reset Password?</Text>
                     <Text style={styles.subTitle}>You're a step away from accessing your account</Text>
                     <View style={styles.form}>
-                    <View style={styles.inputContainer}>
-                        <View style={styles.iconContainer}>
-                            <MaterialIcons name="generating-tokens" size={24} color="green" />
-                            <Text style={styles.label}>Token</Text>
+                        <View style={styles.inputContainer}>
+                            <View style={styles.iconContainer}>
+                                <MaterialIcons name="generating-tokens" size={24} color="green" />
+                                <Text style={styles.label}>Token</Text>
+                            </View>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Enter your token"
+                                placeholderTextColor="grey"
+                                value={token}
+                                onChangeText={onChangeToken}
+                            />
+                            <View style={styles.iconContainer}>
+                                <FontAwesome name="lock" size={24} color="green" />
+                                <Text style={styles.label}>New Password</Text>
+                            </View>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Enter your password"
+                                placeholderTextColor="grey"
+                                value={password}
+                                onChangeText={onChangePassword}
+                                secureTextEntry
+                            />
                         </View>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Enter your token"
-                            placeholderTextColor="grey"
-                            value={token}
-                            onChangeText={onChangeToken}
-                        />
-                        <View style={styles.iconContainer}>
-                            <FontAwesome name="lock" size={24} color="green" />
-                            <Text style={styles.label}>New Password</Text>
-                        </View>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Enter your password"
-                            placeholderTextColor="grey"
-                            value={password}
-                            onChangeText={onChangePassword}
-                            secureTextEntry
-                        />
-                    </View>
                     <View style={styles.inputContainer}>
                         <View style={styles.iconContainer}>
                             <FontAwesome name="lock" size={24} color="green" />
