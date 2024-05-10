@@ -1,17 +1,79 @@
 import React from "react";
-import {View, Text, SafeAreaView, ScrollView, TextInput, StyleSheet, TouchableOpacity} from "react-native";
+import {View, Text, SafeAreaView, ScrollView, Pressable, TextInput, StyleSheet, ToastAndroid, Modal} from "react-native";
 import CustomButton from "../components/CustomButton";
+import LoginScreen from "./loginScreen";
 import { FontAwesome } from '@expo/vector-icons';
+import axios from "axios";
+import { useState } from "react";
 
 const SingUp =()=>{
-    const [email, onChangeEmail] = React.useState('');
-    const [password, onChangePassword] = React.useState('');
-    const [username, onChangeUsername] = React.useState('');
-    const [confirmPassword, onChangeConfirmPassword] = React.useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [username, setUsername] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [modalVisible, setModalVisible] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+    const [isRegistered, setIsRegistered] = useState(true);
+
+
+    function handleSubmit(){
+
+        if (!password || password.trim() === "") {
+            ToastAndroid.show("Password cannot be empty", ToastAndroid.SHORT);
+            return;
+        }
+        
+        if (!confirmPassword || confirmPassword.trim() === "") {
+            ToastAndroid.show("Please confirm your password", ToastAndroid.SHORT);
+            return;
+        }
+        
+        if (password !== confirmPassword) {
+            ToastAndroid.show("Passwords do not match", ToastAndroid.SHORT);
+            return;
+        }
+        
+        if(!username){
+            ToastAndroid.show("Username cannot be empty", ToastAndroid.SHORT)
+            return;
+        }
+        
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!email || !emailRegex.test(email)) {
+            ToastAndroid.show("Invalid email", ToastAndroid.SHORT);
+            return;
+        }
+        
+        const newUserData = {
+            email: email,
+            password:  password,
+            passwordConfirm: confirmPassword,
+            name: username
+        };
+        axios.post("https://apple-plant-disease.onrender.com/api/v1/user/signup", newUserData)
+            .then(res =>{
+                console.log(JSON.stringify(res.data, null, 2));
+
+                if(res.data.status === "success"){
+                    ToastAndroid.show("Registration successful", ToastAndroid.SHORT)
+                    setIsRegistered(true);
+                }else{
+                    ToastAndroid.show("Registration failed", ToastAndroid.SHORT)
+                    setErrorMessage(res.data.message);
+                    setModalVisible(true);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error.response.data.message);
+                setErrorMessage(res.data.message);
+                setModalVisible(true);
+            })
+    }
 
     return(
         <SafeAreaView style={Styles.container}>
-            <ScrollView style={Styles.ScrollView}>
+            { isRegistered ? <LoginScreen/> : <ScrollView style={Styles.ScrollView}>
                 <View style={Styles.content}>
                     <Text style={Styles.title}>Register</Text>
                     <Text style={Styles.subTitle}>Create your new account</Text>
@@ -27,7 +89,7 @@ const SingUp =()=>{
                                 style={Styles.input}
                                 placeholderTextColor="grey"
                                 value={username}
-                                onChangeText={onChangeUsername}
+                                onChangeText={text => setUsername(text)}
                             />
                         </View>
                         <View style={Styles.inputContainer}>
@@ -40,7 +102,7 @@ const SingUp =()=>{
                                 style={Styles.input}
                                 placeholderTextColor="grey"
                                 value={email}
-                                onChangeText={onChangeEmail}
+                                onChangeText={text => setEmail(text)}
                             />
                         </View>
                         <View style={Styles.inputContainer}>
@@ -53,7 +115,7 @@ const SingUp =()=>{
                                 style={Styles.input}
                                 placeholderTextColor="grey"
                                 value={password}
-                                onChangeText={onChangePassword}
+                                onChangeText={text => setPassword(text)}
                                 secureTextEntry
                             />
                             </View>
@@ -67,19 +129,40 @@ const SingUp =()=>{
                                 placeholderTextColor="grey"
                                 style={Styles.input}
                                 value={confirmPassword}
-                                onChangeText={onChangeConfirmPassword}
+                                onChangeText={text => setConfirmPassword(text)}
                                 secureTextEntry
                             />
                         </View>
                         <Text style={Styles.textColor1}>By signing you agree to our <Text style={Styles.textColor2}>Terms of use and privacy notice</Text></Text>
                             <CustomButton
-                                onPress={()=>console.log('Signed up')}
+                                onPress={handleSubmit}
                                 buttonText="Sign Up"
                             />
                         <Text style={Styles.textSign} >Already have an account? <Text style={Styles.textColor2}>Sign in</Text></Text>
                     </View>
                 </View>
-            </ScrollView>
+                <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => {
+                    setModalVisible(!modalVisible);
+                }}
+            >
+                <View style={Styles.centeredView}>
+                    <View style={Styles.modalView}>
+                        <Text style={Styles.modalText}>{errorMessage}</Text>
+                        <Pressable
+                            style={[Styles.button, Styles.buttonClose]}
+                            onPress={() => setModalVisible(!modalVisible)}
+                        >
+                            <Text style={Styles.textStyle}>Close</Text>
+                        </Pressable>
+                    </View>
+                </View>
+            </Modal>
+            </ScrollView>}
+
         </SafeAreaView>
     )
 }
@@ -163,6 +246,39 @@ const Styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
         textDecorationLine: 'underline'
+    },
+    centeredView: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        marginTop: 22,
+    },
+    modalView: {
+        margin: 20,
+        backgroundColor: "white",
+        borderRadius: 20,
+        padding: 35,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5
+    },
+    buttonClose: {
+        backgroundColor: "green",
+    },
+    textStyle: {
+        color: "white",
+        fontWeight: "bold",
+        textAlign: "center"
+    },
+    modalText: {
+        marginBottom: 15,
+        textAlign: "center"
     }
 });
 

@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         width: '100%',
         height: '100%',
-        //marginTop: 40
+        marginTop: 40
     },
     content: {
         flex: 1,

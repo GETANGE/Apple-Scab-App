@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { SafeAreaView, View, Text, Image, StyleSheet, TextInput, TouchableOpacity, ScrollView, ToastAndroid } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Tabs from '../components/Tabs';
 import axios from 'axios';
 
@@ -21,13 +22,15 @@ const LoginScreen = () => {
 
                 if (res.data.status === 'success') {
                     ToastAndroid.show('Logged in successfully!', ToastAndroid.SHORT);
+                    AsyncStorage.setItem('token', res.data.token);
+                    AsyncStorage.setItem('isLocked', JSON.stringify(true));
                     setIsLogged(true);
                 } else {
                     ToastAndroid.show('Login failed. Please check your credentials.', ToastAndroid.SHORT);
                 }
             })
             .catch(error => {
-                console.error('Error:', error.response.data);
+                console.log(error);
                 ToastAndroid.show('Login failed. Please check your credentials.', ToastAndroid.SHORT);
             });
     }
@@ -94,6 +97,7 @@ const styles = StyleSheet.create({
         // justifyContent: 'center',
         width: '100%',
         height: '100%',
+        
     },
     content: {
         alignItems: 'center',
