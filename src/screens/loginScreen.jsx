@@ -1,15 +1,14 @@
-import React from 'react';
-import { SafeAreaView, View, Text, Image, StyleSheet, TextInput, TouchableOpacity, ScrollView , Alert} from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import React, { useState } from 'react';
+import { SafeAreaView, View, Text, Image, StyleSheet, TextInput, TouchableOpacity, ScrollView, ToastAndroid } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
-import { useState } from 'react';
+import Tabs from '../components/Tabs';
 import axios from 'axios';
 
-const LoginScreen = ({props}) => {
-    const navigation = useNavigation();
+const LoginScreen = () => {
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [isLoggedIn, setIsLogged] = useState(false);
 
     function handleSubmit() {
         const userData = {
@@ -17,71 +16,72 @@ const LoginScreen = ({props}) => {
             password: password,
         };
         axios.post("https://apple-plant-disease.onrender.com/api/v1/user/login", userData)
-        .then(res => {
-            console.log(JSON.stringify(res.data, null, 2));
+            .then(res => {
+                console.log(JSON.stringify(res.data, null, 2));
 
-            if (res.data.status === 'success') {
-                Alert.alert("Success", "Logged in successfully");
-                navigation.navigate('Tabs');
-            }
-            
-        })
-        .catch(error => {
-            console.error('Error:', error.response.data);
-            Alert("Login failed. Please check your credentials.");
-        });
+                if (res.data.status === 'success') {
+                    ToastAndroid.show('Logged in successfully!', ToastAndroid.SHORT);
+                    setIsLogged(true);
+                } else {
+                    ToastAndroid.show('Login failed. Please check your credentials.', ToastAndroid.SHORT);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error.response.data);
+                ToastAndroid.show('Login failed. Please check your credentials.', ToastAndroid.SHORT);
+            });
     }
 
     return (
         <SafeAreaView style={styles.container}>
-            <ScrollView style={styles.ScrollView} keyboardShouldPersistTaps="always">
+            { isLoggedIn ? <Tabs/> : <ScrollView style={styles.ScrollView} keyboardShouldPersistTaps="always">
                 <View style={styles.content}>
-                <Image
-                    source={require('../../assets/login.png')}
-                    style={styles.image}
-                />
-                <Text style={styles.title}>Welcome Back</Text>
-                <Text style={styles.subTitle}>Sign in to your account</Text>
-                <View style={styles.form}>
-                    <View style={styles.inputContainer}>
-                        <View style={styles.iconContainer}>
-                            <FontAwesome name="envelope" size={24} color="green" />
-                            <Text style={styles.label}>Email</Text>
-                        </View>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Enter your email"
-                            placeholderTextColor="grey"
-                            value={email}
-                            onChangeText={setEmail} 
-                        />
+                    <Image
+                        source={require('../../assets/login.png')}
+                        style={styles.image}
+                    />
+                    <Text style={styles.title}>Welcome Back</Text>
+                    <Text style={styles.subTitle}>Sign in to your account</Text>
+                    <View style={styles.form}>
+                        <View style={styles.inputContainer}>
+                            <View style={styles.iconContainer}>
+                                <FontAwesome name="envelope" size={24} color="green" />
+                                <Text style={styles.label}>Email</Text>
+                            </View>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Enter your email"
+                                placeholderTextColor="grey"
+                                value={email}
+                                onChangeText={(text) => setEmail(text)}
+                            />
 
-                    </View>
-                    <View style={styles.inputContainer}>
-                        <View style={styles.iconContainer}>
-                            <FontAwesome name="lock" size={24} color="green" />
-                            <Text style={styles.label}>Password</Text>
                         </View>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Enter your password"
-                            placeholderTextColor="grey"
-                            value={password}
-                            onChangeText={setPassword}
-                            secureTextEntry
-                        />
+                        <View style={styles.inputContainer}>
+                            <View style={styles.iconContainer}>
+                                <FontAwesome name="lock" size={24} color="green" />
+                                <Text style={styles.label}>Password</Text>
+                            </View>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Enter your password"
+                                placeholderTextColor="grey"
+                                value={password}
+                                onChangeText={(text) => setPassword(text)}
+                                secureTextEntry
+                            />
+                        </View>
                     </View>
+                    <Text style={styles.forget}>Forgot Password?</Text>
+                    <TouchableOpacity
+                        style={styles.button}
+                        onPress={handleSubmit}
+                    >
+                        <Text style={styles.buttonText}>Login</Text>
+                    </TouchableOpacity>
+                    <Text style={styles.textSign} >Don't have an account? <Text style={styles.textColor2}>Sign up</Text></Text>
                 </View>
-                <Text style={styles.forget}>Forgot Password?</Text>
-                <TouchableOpacity
-                    style={styles.button}
-                    onPress={() => handleSubmit()}
-                >
-                    <Text style={styles.buttonText}>Login</Text>
-                </TouchableOpacity>
-                <Text style={styles.textSign} >Don't have an account? <Text style={styles.textColor2}>Sign up</Text></Text>
-            </View>
-            </ScrollView>
+            </ScrollView>}
         </SafeAreaView>
     );
 }
@@ -90,8 +90,8 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fff',
-        alignItems: 'center',
-        justifyContent: 'center',
+        // alignItems: 'center',
+        // justifyContent: 'center',
         width: '100%',
         height: '100%',
     },

@@ -1,7 +1,6 @@
 import React from 'react';
 import { Feather, FontAwesome5 } from '@expo/vector-icons'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-
 import Description from '../screens/description';
 import Setting from '../screens/settings';
 import Home from '../screens/HomeScreen';
