@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState } from 'react';
-import { SafeAreaView, View, Text, StyleSheet , Image, Pressable, Modal, Button, Alert} from 'react-native';
+import { SafeAreaView, View, Text, StyleSheet , Image, Pressable, Modal, Button, Alert, ToastAndroid, TouchableOpacity} from 'react-native';
 import { SimpleLineIcons, AntDesign, Fontisto, Foundation, FontAwesome5} from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 
@@ -15,15 +15,41 @@ const Home = () => {
             quality: 1
         });
         if (!result.canceled) {
-            setSelectedImage(result.uri);
+            setSelectedImage(result.assets[0].uri);
             setShowModal(true);
         } else {
-            alert('You did not select any image.');
+            ToastAndroid.show("You've not selected any image", ToastAndroid.SHORT);
         }
     };
 
 return (
         <SafeAreaView style={styles.container}>
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={showModal}
+                onRequestClose={() => {
+                    ToastAndroid.show("Modal has been closed.", ToastAndroid.SHORT)
+                    setShowModal(!showModal);
+                }}
+            >
+                <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                        {selectedImage && <Image source={{ uri: selectedImage }} style={{width: 300, height:200, borderRadius: 10}} />}
+                        <TouchableOpacity
+                            style={[styles.buttonModal, styles.buttonClose]}
+                            onPress={() => setShowModal(!showModal)}
+                        >
+                            <Text style={styles.textStyle}>Close</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
+
+            {showModal && (
+                <View style={styles.faintTint}/>
+            )}
+
             <Text style={styles.profile}>Hello, Emmanuel</Text>
             <View style={styles.content}>
                 {/* Home Card */}
@@ -69,7 +95,7 @@ return (
                     {/* Take a photo button */}
                     <View style={styles.buttonContainer}>
                         <FontAwesome5 name="camera" size={24} color="green" style={styles.icon2} />
-                        <Pressable onPress={pickImageAsync} style={styles.button}>
+                        <Pressable style={styles.button}>
                             <Text style={styles.buttonText}>Take a photo</Text>
                         </Pressable>
                     </View>
@@ -77,7 +103,7 @@ return (
                     {/* Upload a photo button */}
                     <View style={styles.buttonContainer}>
                         <FontAwesome5 name="upload" size={24} color="green" style={styles.icon2} />
-                        <Pressable onPress={() => setShowModal(true)} style={styles.button}>
+                        <Pressable onPress={pickImageAsync} style={styles.button}>
                             <Text style={styles.buttonText}>Upload a photo</Text>
                         </Pressable>
                     </View>
@@ -93,7 +119,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         width: '100%',
         height: '100%',
-        marginTop: 40
+        // marginTop: 40
     },
     content: {
         flex: 1,
@@ -142,8 +168,9 @@ const styles = StyleSheet.create({
         color: 'green',
         alignItems: 'center',
         justifyContent: 'center',
-        marginTop:25,
-        marginLeft:10
+        marginTop:50,
+        marginLeft:10,
+        marginBottom:10
     },
     profile2:{
         fontSize: 20,
@@ -200,17 +227,56 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         marginLeft: 50
     },
-    modalContainer: {
+    centeredView: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        marginTop: 22,
     },
-    modalImage: {
-        width: 300,
-        height: 300,
-        borderRadius: 10,
-        marginBottom: 10,
+    modalView: {
+        margin: 20,
+        backgroundColor: 'white',
+        borderRadius: 20,
+        padding: 35,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+        height: 580,
+        width: 330,
+    },
+    buttonModal: {
+        borderRadius: 20,
+        padding: 10,
+        elevation: 2,
+    },
+    buttonClose: {
+        backgroundColor: 'green', 
+        borderRadius: 5, 
+        padding: 10, 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height:39,
+        width: 100,
+    },
+    textStyle: {
+        color: 'white',
+        fontWeight: 'bold',
+        textAlign: 'center',
+    },
+    modalText: {
+        marginBottom: 15,
+        textAlign: 'center',
+    },
+    faintTint: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: 'rgba(0, 0, 0, 0.7)', // Semi-transparent black background
+        zIndex: 6, // Ensure the tint is behind the modal
     },
 });
 

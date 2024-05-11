@@ -5,26 +5,25 @@ import SingUp from './src/screens/signUp';
 import Tabs from './src/components/Tabs';
 
 export default function App() {
-  // const [isLockedIn, setIsLockedIn] = useState(false);
+  const [isLockedIn, setIsLockedIn] = useState(false);
 
-  // async function getData() {
-  //   try {
-  //     const data = await AsyncStorage.getItem('isLocked');
-  //     console.log('Data stored in AsyncStorage:', data);
-  //     setIsLockedIn(data === 'true'); // Parse data as boolean
-  //   } catch (error) {
-  //     console.error('Error reading data from AsyncStorage:', error);
-  //   }
-  // }
-  
+  async function getData() {
+    try {
+      const data = await AsyncStorage.getItem('isLocked');
+      console.log('Data stored in AsyncStorage:', data);
+      setIsLockedIn(data === 'true'); // Parse data as boolean
+    } catch (error) {
+      console.error('Error reading data from AsyncStorage:', error);
+    }
+  }
 
-  // useEffect(() => {
-  //   getData();
-  // }, []); // Empty dependency array to run only once on mount
+  useEffect(() => {
+    getData();
+  }, []); // Empty dependency array to run only once on mount
 
   return (
     <NavigationContainer>
-          <SingUp/>
+        { isLockedIn ? <Tabs/> : <SingUp/>}
     </NavigationContainer>
   );
 }
