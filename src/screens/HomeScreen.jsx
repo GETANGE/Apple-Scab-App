@@ -1,26 +1,65 @@
 import React from 'react';
 import { useState } from 'react';
-import { SafeAreaView, View, Text, StyleSheet , Image, Pressable, Modal, Button, Alert, ToastAndroid, TouchableOpacity} from 'react-native';
+import { SafeAreaView, View, Text, StyleSheet , Image, Pressable, Modal, ToastAndroid, TouchableOpacity} from 'react-native';
 import { SimpleLineIcons, AntDesign, Fontisto, Foundation, FontAwesome5} from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import axios from 'axios';
 
 const Home = () => {
     const [selectedImage, setSelectedImage] = useState(null);
     const [showModal, setShowModal] = useState(false);
 
-    // Function to pick image from gallery
-    const pickImageAsync = async () => {
-        let result = await ImagePicker.launchImageLibraryAsync({
+// Function to pick image from gallery
+const pickImageAsync = async () => {
+    try {
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.All,
             allowsEditing: true,
-            quality: 1
+            aspect: [4, 3],
+            quality: 0.5,
         });
+
+
+        console.log(JSON.stringify(result));
+
         if (!result.canceled) {
             setSelectedImage(result.assets[0].uri);
             setShowModal(true);
-        } else {
-            ToastAndroid.show("You've not selected any image", ToastAndroid.SHORT);
-        }
-    };
+
+            const { uri } = result.assets[0]; // Destructure uri from the object
+                if (!uri) {
+                console.warn('No image URI found in the result');
+                return; // Handle the case where uri is missing
+                }
+
+                console.log("image has been selected");
+                const formData = new FormData();
+        
+                formData.append('file',  {
+                    uri: uri,
+                    type: result.assets[0].mimeType ,
+                    name: "apple.png",
+                });  // Append image data with filename
+
+                const config = {
+                    method: 'post',
+                    url: `https://scab-model.onrender.com/predict`,
+                    headers: { 
+                      'Content-Type': 'multipart/form-data'
+                    },
+                    data : formData
+                  };
+                  
+        
+                const response = await axios(config)
+                console.log(response.data);
+            } else {
+                console.log('Image selection cancelled');
+            }
+    } catch (error) {
+        console.log('Error:', error);
+    }
+};
 
 return (
         <SafeAreaView style={styles.container}>
@@ -42,6 +81,14 @@ return (
                         >
                             <Text style={styles.textStyle}>Close</Text>
                         </TouchableOpacity>
+                        <Text>{selectedImage}</Text>
+
+                        {/* <TouchableOpacity
+                            style={[styles.buttonModal, styles.buttonClose]}
+                            onPress={handlePickImage}
+                        >
+                            <Text style={styles.textStyle}>Predict</Text>
+                        </TouchableOpacity> */}
                     </View>
                 </View>
             </Modal>
