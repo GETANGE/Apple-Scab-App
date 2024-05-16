@@ -1,10 +1,34 @@
 import React from 'react';
-import { SafeAreaView, View, Text, ScrollView , Image, StyleSheet, TextInput, TouchableOpacity} from 'react-native';
+import { SafeAreaView, View, Text, ScrollView , Image, StyleSheet, TextInput, TouchableOpacity, ToastAndroid} from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
+import axios from 'axios';
 
 const ForgotPassword = () => {
     const [email, onChangeEmail] = React.useState('');
     
+    // function to reset a password
+    const resetPassword = () => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!email || !emailRegex.test(email)) {
+            ToastAndroid.show("Invalid email", ToastAndroid.SHORT);
+            return;
+        }
+
+        const userEmail = {
+            email: email
+        };
+        axios.post("https://apple-plant-disease.onrender.com/api/v1/user/forgotPassword", userEmail)
+            .then(response => {
+                console.log(JSON.stringify(response.data, null, 2));
+
+                if (response.data.status ==='success') {
+                    ToastAndroid.show('Password reset link has been sent to your email', ToastAndroid.SHORT);
+                } else {
+                    ToastAndroid.show('Password reset link has not been sent to your email', ToastAndroid.SHORT);
+                }
+            })
+    }
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView styles={styles.ScrollView}>
@@ -31,7 +55,7 @@ const ForgotPassword = () => {
                     </View>
                         <TouchableOpacity
                             style={styles.button}
-                            onPress={() => console.log('Logged in')}
+                            onPress={resetPassword}
                             >
                             <Text style={styles.buttonText}>Send Link</Text>
                         </TouchableOpacity>

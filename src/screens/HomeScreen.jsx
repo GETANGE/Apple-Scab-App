@@ -8,58 +8,82 @@ import axios from 'axios';
 const Home = () => {
     const [selectedImage, setSelectedImage] = useState(null);
     const [showModal, setShowModal] = useState(false);
+    const [predicted, setPredicted] = useState('');
+    const [confidence, setConfidence] = useState(null);
+    const [disease, setDiseaseData] = useState(false);
 
-// Function to pick image from gallery
-const pickImageAsync = async () => {
-    try {
-        const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.All,
-            allowsEditing: true,
-            aspect: [4, 3],
-            quality: 0.5,
-        });
+    // Function to pick image from gallery
+    const pickImageAsync = async () => {
+        try {
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.All,
+                allowsEditing: true,
+                aspect: [4, 3],
+                quality: 0.5,
+            });
 
+            console.log(JSON.stringify(result));
 
-        console.log(JSON.stringify(result));
+            if (!result.canceled) {
+                setSelectedImage(result.assets[0].uri);
+                setShowModal(true);
 
-        if (!result.canceled) {
-            setSelectedImage(result.assets[0].uri);
-            setShowModal(true);
-
-            const { uri } = result.assets[0]; // Destructure uri from the object
+                const { uri } = result.assets[0];
                 if (!uri) {
-                console.warn('No image URI found in the result');
-                return; // Handle the case where uri is missing
+                    console.warn('No image URI found in the result');
+                    return;
                 }
 
-                console.log("image has been selected");
+                console.log("Image has been selected");
                 const formData = new FormData();
-        
-                formData.append('file',  {
+
+                formData.append('file', {
                     uri: uri,
-                    type: result.assets[0].mimeType ,
+                    type: result.assets[0].mimeType,
                     name: "apple.png",
-                });  // Append image data with filename
+                });
 
                 const config = {
                     method: 'post',
                     url: `https://scab-model.onrender.com/predict`,
-                    headers: { 
-                      'Content-Type': 'multipart/form-data'
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
                     },
-                    data : formData
-                  };
-                  
-        
-                const response = await axios(config)
-                console.log(response.data);
+                    data: formData
+                };
+
+                const response = await axios(config);
+                console.log(JSON.stringify(response.data, null, 2));
+
+                // Store the API response data in the state
+                if (response.data && response.data.Predicted && response.data.confidence !== undefined) {
+                    setPredicted(response.data.Predicted);
+                    setConfidence(response.data.confidence);
+
+                    // Calling the second API
+                    const diseaseDataPayload = {
+                        diseases: disease
+                    };
+
+                    axios.post('https://apple-plant-disease.onrender.com/api/v1/disease', diseaseDataPayload)
+                        .then(res => {
+                            console.log(JSON.stringify(res.data, null, 2));
+
+                            if (res.data.status === 'success') {
+                                setDiseaseData(res.data.data.diseases);
+                            }
+                        })
+                        .catch(err => {
+                            console.log("Error is:", err);
+                        });
+                }
             } else {
                 console.log('Image selection cancelled');
             }
-    } catch (error) {
-        console.log('Error:', error);
-    }
-};
+        } catch (error) {
+            console.log('Error:', error);
+        }
+    };
 
 return (
         <SafeAreaView style={styles.container}>
@@ -81,14 +105,19 @@ return (
                         >
                             <Text style={styles.textStyle}>Close</Text>
                         </TouchableOpacity>
-                        <Text>{selectedImage}</Text>
+                        <Text>Predicted:{predicted}</Text>
+                        <Text>Confidence:{confidence}</Text>
 
-                        {/* <TouchableOpacity
-                            style={[styles.buttonModal, styles.buttonClose]}
-                            onPress={handlePickImage}
-                        >
-                            <Text style={styles.textStyle}>Predict</Text>
-                        </TouchableOpacity> */}
+                        {disease && (
+                            <>
+                                <Text>Description: {disease.description}</Text>
+                                <Text>Symptoms:</Text>
+                                {disease.symptoms.map((symptom, index) => (
+                                    <Text key={index}>- {symptom}</Text>
+                                ))}
+                                <Text>Treatment: {disease.treatment}</Text>
+                            </>
+                        )}
                     </View>
                 </View>
             </Modal>
