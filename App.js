@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SingUp from './src/screens/signUp';
 import Tabs from './src/components/Tabs';
+import ResetPassword from './src/screens/resetpass';
 
 export default function App() {
   const [isLockedIn, setIsLockedIn] = useState(false);
@@ -22,8 +23,9 @@ export default function App() {
   }, []); // Empty dependency array to run only once on mount
 
   return (
-    <NavigationContainer>
-        { isLockedIn ? <Tabs/> : <SingUp/>}
-    </NavigationContainer>
+    // <NavigationContainer>
+    //     { isLockedIn ? <Tabs/> : <SingUp/>}
+    // </NavigationContainer>
+    <ResetPassword/>
   );
 }

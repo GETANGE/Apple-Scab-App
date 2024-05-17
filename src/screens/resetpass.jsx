@@ -1,13 +1,36 @@
 import React from 'react';
-import { SafeAreaView, View, Text, ScrollView , Image, StyleSheet, TextInput, TouchableOpacity} from 'react-native';
+import { SafeAreaView, View, Text, ScrollView , Image, StyleSheet, TextInput, TouchableOpacity, ToastAndroid} from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
+import axios from 'axios';
 
 const ResetPassword = () => {
     const [password, onChangePassword] = React.useState('');
     const [passwordConfirm, onChangePasswordConfirm] = React.useState('');
     const [token, onChangeToken] = React.useState('');
     
+
+    const resetPassword= () => {
+        const resetUserPassword ={
+            password:  password,
+            passwordConfirm:  passwordConfirm,
+            token: token
+        };
+        axios.patch(`https://apple-plant-disease.onrender.com/api/v1/user/resetPassword/${token}`, resetUserPassword)
+            .then(response => {
+                console.log(JSON.stringify(response.data, null, 2));
+
+                if (response.data.status ==='success') {
+                    ToastAndroid.show('Password reset successfully!', ToastAndroid.SHORT);
+                } else {
+                    ToastAndroid.show('Password reset failed!', ToastAndroid.SHORT);
+                }
+            })
+            .catch(error => {
+                console.log(error.response.data.message);
+                ToastAndroid.show('Password reset failed!', ToastAndroid.SHORT);
+            });
+    }
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView styles={styles.ScrollView}>
@@ -60,7 +83,7 @@ const ResetPassword = () => {
                     </View>
                         <TouchableOpacity
                             style={styles.button}
-                            onPress={() => console.log('password reset is successful')}
+                            onPress={resetPassword}
                             >
                             <Text style={styles.buttonText}>Reset</Text>
                         </TouchableOpacity>
