@@ -11,6 +11,32 @@ const ResetPassword = () => {
     
 
     const resetPassword= () => {
+
+        if(!token || token.trim() === '') {
+            ToastAndroid.show('Token is required', ToastAndroid.SHORT);
+            return;
+        }
+        if(token.length < 8){
+            ToastAndroid.show('Token must be at least 8 characters', ToastAndroid.SHORT);
+            return;
+        }
+        if(!password || password.trim() === '') {
+            ToastAndroid.show('Password is required', ToastAndroid.SHORT);
+            return;
+        }
+        if(password.length < 8){
+            ToastAndroid.show('Password must be at least 8 characters', ToastAndroid.SHORT);
+            return;
+        }
+        if(!passwordConfirm || passwordConfirm.trim() === '') {
+            ToastAndroid.show('Please confirm your password', ToastAndroid.SHORT);
+            return;
+        }
+        if (password!== passwordConfirm) {
+            ToastAndroid.show('Passwords do not match', ToastAndroid.SHORT);
+            return;
+        }
+
         const resetUserPassword ={
             password:  password,
             passwordConfirm:  passwordConfirm,
@@ -27,8 +53,7 @@ const ResetPassword = () => {
                 }
             })
             .catch(error => {
-                console.log(error.response.data.message);
-                ToastAndroid.show('Password reset failed!', ToastAndroid.SHORT);
+                ToastAndroid.show(error.response.data.message, ToastAndroid.SHORT);
             });
     }
     return (
@@ -103,18 +128,13 @@ const styles =StyleSheet.create({
         backgroundColor: '#fff',
         alignItems: 'center',
         justifyContent: 'center',
-        width: '100%',
-        height: '100%',
     },
     ScrollView:{
-        width: '100%',
-        height: '100%',
         marginTop: 50
     },
     content: {
         alignItems: 'center',
         paddingHorizontal: 20,
-        width: '100%',
         marginTop: 40
     },
     image: {
@@ -138,7 +158,6 @@ const styles =StyleSheet.create({
     },
     input: {
         height: 40,
-        width: '100%',
         paddingHorizontal: 10,
         borderRadius: 10,
         color: '#333',
@@ -165,7 +184,6 @@ const styles =StyleSheet.create({
         paddingVertical: 10,
         paddingHorizontal: 20,
         borderRadius: 20,
-        width: '100%', // Adjust the width as needed
         alignItems: 'center', // Center the content horizontally
     },
     buttonText: {

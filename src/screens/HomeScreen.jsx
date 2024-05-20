@@ -65,12 +65,11 @@ const Home = () => {
                         diseases: disease
                     };
 
-                    axios.post('https://apple-plant-disease.onrender.com/api/v1/disease', diseaseDataPayload)
+                    axios.get('https://apple-plant-disease.onrender.com/api/v1/disease', diseaseDataPayload)
                         .then(res => {
-                            console.log(JSON.stringify(res.data, null, 2));
-
                             if (res.data.status === 'success') {
-                                setDiseaseData(res.data.data.diseases);
+                                setDiseaseData(res.data.data.diseases[1]);
+                                console.log(JSON.stringify(res.data.data.diseases[1], null, 2));
                             }
                         })
                         .catch(err => {
@@ -115,7 +114,7 @@ return (
                                 {disease.symptoms.map((symptom, index) => (
                                     <Text key={index}>- {symptom}</Text>
                                 ))}
-                                <Text>Treatment: {disease.treatment}</Text>
+                                <Text>Reccomendation: {disease.treatment}</Text>
                             </>
                         )}
                     </View>

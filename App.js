@@ -23,9 +23,9 @@ export default function App() {
   }, []); // Empty dependency array to run only once on mount
 
   return (
-    // <NavigationContainer>
-    //     { isLockedIn ? <Tabs/> : <SingUp/>}
-    // </NavigationContainer>
-    <ResetPassword/>
+    <NavigationContainer>
+        { isLockedIn ? <Tabs/> : <SingUp/>}
+    </NavigationContainer>
+    //<ResetPassword/>
   );
 }
