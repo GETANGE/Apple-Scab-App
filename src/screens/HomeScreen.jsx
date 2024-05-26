@@ -11,6 +11,7 @@ const Home = () => {
     const [predicted, setPredicted] = useState('');
     const [confidence, setConfidence] = useState(null);
     const [disease, setDiseaseData] = useState(false);
+    const [recommend, setRecommendData] = useState(false);
 
     // Function to pick image from gallery
     const pickImageAsync = async () => {
@@ -68,8 +69,17 @@ const Home = () => {
                     axios.get('https://apple-plant-disease.onrender.com/api/v1/disease', diseaseDataPayload)
                         .then(res => {
                             if (res.data.status === 'success') {
-                                setDiseaseData(res.data.data.diseases[1]);
-                                console.log(JSON.stringify(res.data.data.diseases[1], null, 2));
+                                const data = res.data.data.diseases[1];
+                                setDiseaseData(data);
+
+                                function getRandomItem(array){
+                                    const randomIndex = Math.floor(Math.random()*array.length);
+                                    return array[randomIndex];
+                                }
+
+                                const randomItem= getRandomItem(data.treatment);
+                                console.log(JSON.stringify(randomItem, null, 2));
+                                setRecommendData(randomItem);
                             }
                         })
                         .catch(err => {
@@ -83,6 +93,13 @@ const Home = () => {
             console.log('Error:', error);
         }
     };
+
+    const closeModal=()=>{
+        setDiseaseData('');
+        setPredicted('');
+        setConfidence('');
+        setShowModal(!showModal);
+    }
 
 return (
         <SafeAreaView style={styles.container}>
@@ -100,21 +117,21 @@ return (
                         {selectedImage && <Image source={{ uri: selectedImage }} style={{width: 300, height:200, borderRadius: 10}} />}
                         <TouchableOpacity
                             style={[styles.buttonModal, styles.buttonClose]}
-                            onPress={() => setShowModal(!showModal)}
+                            onPress={closeModal}
                         >
                             <Text style={styles.textStyle}>Close</Text>
                         </TouchableOpacity>
-                        <Text>Predicted:{predicted}</Text>
-                        <Text>Confidence:{confidence}</Text>
+                        <Text style={styles.prediction}>Predicted:<Text style={styles.predict}>{predicted}</Text></Text>
+                        <Text style={styles.prediction}>Confidence:<Text style={styles.predicting}>{confidence}</Text></Text>
 
                         {disease && (
                             <>
-                                <Text>Description: {disease.description}</Text>
-                                <Text>Symptoms:</Text>
+                                <Text style={styles.prediction}>Description:<Text style={styles.predict}> {disease.description}</Text></Text>
+                                <Text style={styles.prediction}>Symptoms:</Text>
                                 {disease.symptoms.map((symptom, index) => (
                                     <Text key={index}>- {symptom}</Text>
                                 ))}
-                                <Text>Reccomendation: {disease.treatment}</Text>
+                                <Text style={styles.prediction}>Recomendation:<Text style={styles.predict}> {recommend}</Text></Text>
                             </>
                         )}
                     </View>
@@ -353,6 +370,15 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0, 0, 0, 0.7)', // Semi-transparent black background
         zIndex: 6, // Ensure the tint is behind the modal
     },
+    prediction:{
+        color:'green',
+    },
+    predict:{
+        color:'black',
+    },
+    predicting:{
+        color:'red',
+    }
 });
 
 export default Home;

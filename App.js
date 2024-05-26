@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import SingUp from './src/screens/signUp';
 import Tabs from './src/components/Tabs';
 import ResetPassword from './src/screens/resetpass';
+import ForgotPassword from './src/screens/forgotpass';
 
 export default function App() {
   const [isLockedIn, setIsLockedIn] = useState(false);
@@ -26,6 +27,7 @@ export default function App() {
     <NavigationContainer>
         { isLockedIn ? <Tabs/> : <SingUp/>}
     </NavigationContainer>
-    //<ResetPassword/>
+    // <ResetPassword/>
+    // <ForgotPassword/>
   );
 }
