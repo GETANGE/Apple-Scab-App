@@ -3,7 +3,7 @@ import { SafeAreaView, View, Text, ScrollView , Image, StyleSheet, TextInput, To
 import { FontAwesome } from '@expo/vector-icons';
 import axios from 'axios';
 
-const ForgotPassword = () => {
+const ForgotPassword = ({navigation}) => {
     const [email, onChangeEmail] = React.useState('');
     
     // function to reset a password
@@ -60,7 +60,7 @@ const ForgotPassword = () => {
                             <Text style={styles.buttonText}>Send Link</Text>
                         </TouchableOpacity>
                         <View style={styles.bottomTextContainer}>
-                                <Text style={styles.textSign} >Already have an account? <Text style={styles.textColor2}>Sign in</Text></Text>
+                                <Text style={styles.textSign} >Already have an account? <Text style={styles.textColor2} onPress={()=>navigation.navigate("Login")}>Sign in</Text></Text>
                         </View>
                     </View>
                 </View>

@@ -1,19 +1,17 @@
 import React from "react";
 import {View, Text, SafeAreaView, ScrollView, Pressable, TextInput, StyleSheet, ToastAndroid, Modal} from "react-native";
 import CustomButton from "../components/CustomButton";
-import LoginScreen from "./loginScreen";
 import { FontAwesome } from '@expo/vector-icons';
 import axios from "axios";
 import { useState } from "react";
 
-const SingUp =()=>{
+const SingUp =({navigation})=>{
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [username, setUsername] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
-    const [isRegistered, setIsRegistered] = useState(true);
 
 
     function handleSubmit(){
@@ -57,7 +55,6 @@ const SingUp =()=>{
 
                 if(res.data.status === "success"){
                     ToastAndroid.show("Registration successful", ToastAndroid.SHORT)
-                    setIsRegistered(true);
                 }else{
                     ToastAndroid.show("Registration failed", ToastAndroid.SHORT)
                     setErrorMessage(res.data.message);
@@ -73,7 +70,7 @@ const SingUp =()=>{
 
     return(
         <SafeAreaView style={Styles.container}>
-            { isRegistered ? <LoginScreen/> : <ScrollView style={Styles.ScrollView}>
+            <ScrollView style={Styles.ScrollView}>
                 <View style={Styles.content}>
                     <Text style={Styles.title}>Register</Text>
                     <Text style={Styles.subTitle}>Create your new account</Text>
@@ -138,7 +135,7 @@ const SingUp =()=>{
                                 onPress={handleSubmit}
                                 buttonText="Sign Up"
                             />
-                        <Text style={Styles.textSign} >Already have an account? <Text style={Styles.textColor2}>Sign in</Text></Text>
+                        <Text style={Styles.textSign} >Already have an account? <Text style={Styles.textColor2} onPress={()=>navigation.navigate("Login")}>Sign in</Text></Text>
                     </View>
                 </View>
                 <Modal
@@ -161,7 +158,7 @@ const SingUp =()=>{
                     </View>
                 </View>
             </Modal>
-            </ScrollView>}
+            </ScrollView>
 
         </SafeAreaView>
     )

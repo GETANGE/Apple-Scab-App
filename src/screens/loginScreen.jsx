@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Tabs from '../components/Tabs';
 import axios from 'axios';
 
-const LoginScreen = () => {
+const LoginScreen = ({navigation}) => {
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -75,14 +75,14 @@ const LoginScreen = () => {
                             />
                         </View>
                     </View>
-                    <Text style={styles.forget}>Forgot Password?</Text>
+                    <Text style={styles.forget} onPress={()=>navigation.navigate("ForgotPassword")}>Forgot Password?</Text>
                     <TouchableOpacity
                         style={styles.button}
                         onPress={handleSubmit}
                     >
                         <Text style={styles.buttonText}>Login</Text>
                     </TouchableOpacity>
-                    <Text style={styles.textSign} >Don't have an account? <Text style={styles.textColor2}>Sign up</Text></Text>
+                    <Text style={styles.textSign} >Don't have an account? <Text style={styles.textColor2} onPress={()=>navigation.navigate("Register")}>Sign up</Text></Text>
                 </View>
             </ScrollView>}
         </SafeAreaView>
