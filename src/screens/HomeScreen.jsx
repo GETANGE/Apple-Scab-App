@@ -5,7 +5,7 @@ import { SimpleLineIcons, AntDesign, Fontisto, Foundation, FontAwesome5} from '@
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
 
-const Home = () => {
+const Home = ({navigation}) => {
     const [selectedImage, setSelectedImage] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [predicted, setPredicted] = useState('');
@@ -188,7 +188,7 @@ return (
                     <View style={styles.buttonContainer}>
                         <FontAwesome5 name="camera" size={24} color="green" style={styles.icon2} />
                         <Pressable style={styles.button}>
-                            <Text style={styles.buttonText}>Take a photo</Text>
+                            <Text style={styles.buttonText} onPress={()=>navigation.navigate("CameraButton")}>Take a photo</Text>
                         </Pressable>
                     </View>
 

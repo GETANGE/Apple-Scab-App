@@ -7,6 +7,7 @@ import Tabs from './src/components/Tabs';
 import LoginScreen from './src/screens/loginScreen';
 import ResetPassword from './src/screens/resetpass';
 import ForgotPassword from './src/screens/forgotpass';
+import CameraButton from './src/components/cameraButton';
 
 const Stack = createStackNavigator();
 
@@ -33,12 +34,13 @@ export default function App() {
         <Tabs />
       ) : (
         <Stack.Navigator screenOptions={{ 
-        headerShown:false,
-      }}>
+              headerShown:false,
+            }}>
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="Register" component={SignUp} />
           <Stack.Screen name="ResetPassword" component={ResetPassword} />
           <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
+          <Stack.Screen name="CameraButton" component={CameraButton} />
         </Stack.Navigator>
       )}
     </NavigationContainer>
