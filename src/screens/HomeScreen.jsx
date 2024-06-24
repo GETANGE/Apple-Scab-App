@@ -58,33 +58,35 @@ const Home = ({navigation}) => {
 
                 // Store the API response data in the state
                 if (response.data && response.data.Predicted && response.data.confidence !== undefined) {
-                    setPredicted(response.data.Predicted);
+                    setPredicted(response.data.Predicted);                    
                     setConfidence(response.data.confidence);
 
-                    // Calling the second API
-                    const diseaseDataPayload = {
-                        diseases: disease
-                    };
+                    if(response.data.Predicted.length === 10){
+                        // Calling the second API
+                        const diseaseDataPayload = {
+                            diseases: disease
+                        };
 
-                    axios.get('https://apple-plant-disease.onrender.com/api/v1/disease', diseaseDataPayload)
-                        .then(res => {
-                            if (res.data.status === 'success') {
-                                const data = res.data.data.diseases[1];
-                                setDiseaseData(data);
+                        axios.get('https://apple-plant-disease.onrender.com/api/v1/disease', diseaseDataPayload)
+                            .then(res => {
+                                if (res.data.status === 'success') {
+                                    const data = res.data.data.diseases[1];
+                                    setDiseaseData(data);
 
-                                function getRandomItem(array){
-                                    const randomIndex = Math.floor(Math.random()*array.length);
-                                    return array[randomIndex];
+                                    function getRandomItem(array){
+                                        const randomIndex = Math.floor(Math.random()*array.length);
+                                        return array[randomIndex];
+                                    }
+
+                                    const randomItem= getRandomItem(data.treatment);
+                                    console.log(JSON.stringify(randomItem, null, 2));
+                                    setRecommendData(randomItem);
                                 }
-
-                                const randomItem= getRandomItem(data.treatment);
-                                console.log(JSON.stringify(randomItem, null, 2));
-                                setRecommendData(randomItem);
-                            }
-                        })
-                        .catch(err => {
-                            console.log("Error is:", err);
-                        });
+                            })
+                            .catch(err => {
+                                console.log("Error is:", err);
+                            });
+                        }
                 }
             } else {
                 console.log('Image selection cancelled');
