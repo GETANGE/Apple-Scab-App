@@ -15,6 +15,11 @@ const ForgotPassword = ({navigation}) => {
             return;
         }
 
+        // function to redirect to the password reset page
+        const redirectToReset = function(){
+            navigation.navigate('ResetPassword');
+        }
+
         const userEmail = {
             email: email
         };
@@ -24,9 +29,13 @@ const ForgotPassword = ({navigation}) => {
 
                 if (response.data.status ==='success') {
                     ToastAndroid.show('Password reset link has been sent to your email', ToastAndroid.SHORT);
+                    redirectToReset();
                 } else {
                     ToastAndroid.show('Password reset link has not been sent to your email', ToastAndroid.SHORT);
                 }
+            })
+            .catch(error=>{
+                ToastAndroid.show(error.response.data.message, ToastAndroid.SHORT);
             })
     }
     return (

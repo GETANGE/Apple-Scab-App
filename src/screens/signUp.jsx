@@ -42,6 +42,11 @@ const SingUp =({navigation})=>{
             ToastAndroid.show("Invalid email", ToastAndroid.SHORT);
             return;
         }
+
+        // function to route to the login page 
+        const routeToLogin = function(){
+            navigation.navigate('Login');
+        }
         
         const newUserData = {
             email: email,
@@ -54,7 +59,9 @@ const SingUp =({navigation})=>{
                 console.log(JSON.stringify(res.data, null, 2));
 
                 if(res.data.status === "success"){
-                    ToastAndroid.show("Registration successful", ToastAndroid.SHORT)
+                    ToastAndroid.show("Registration successful", ToastAndroid.SHORT);
+                    routeToLogin();
+                    
                 }else{
                     ToastAndroid.show("Registration failed", ToastAndroid.SHORT)
                     setErrorMessage(res.data.message);

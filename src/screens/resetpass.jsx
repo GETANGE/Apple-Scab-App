@@ -4,7 +4,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
 import axios from 'axios';
 
-const ResetPassword = () => {
+const ResetPassword = ({navigation}) => {
     const [password, onChangePassword] = React.useState('');
     const [passwordConfirm, onChangePasswordConfirm] = React.useState('');
     const [token, onChangeToken] = React.useState('');
@@ -37,6 +37,11 @@ const ResetPassword = () => {
             return;
         }
 
+        //function to route to the login page
+        const redirectToLogin = function (){
+            navigation.navigate('Login');
+        }
+
         const resetUserPassword ={
             password:  password,
             passwordConfirm:  passwordConfirm,
@@ -48,6 +53,8 @@ const ResetPassword = () => {
 
                 if (response.data.status ==='success') {
                     ToastAndroid.show('Password reset successfully!', ToastAndroid.SHORT);
+                    redirectToLogin();
+
                 } else {
                     ToastAndroid.show('Password reset failed!', ToastAndroid.SHORT);
                 }
@@ -113,7 +120,7 @@ const ResetPassword = () => {
                             <Text style={styles.buttonText}>Reset</Text>
                         </TouchableOpacity>
                         <View style={styles.bottomTextContainer}>
-                                <Text style={styles.textSign} >Already have an account? <Text style={styles.textColor2}>Sign in</Text></Text>
+                                <Text style={styles.textSign} >Already have an account? <Text style={styles.textColor2} onPress={()=> navigation.navigate('Login')}>Sign in</Text></Text>
                         </View>
                     </View>
                 </View>
