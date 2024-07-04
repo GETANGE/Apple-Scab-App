@@ -6,12 +6,23 @@ import Tabs from '../components/Tabs';
 import axios from 'axios';
 
 const LoginScreen = ({navigation}) => {
-
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoggedIn, setIsLogged] = useState(false);
 
     function handleSubmit() {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!email || !emailRegex.test(email)) {
+            ToastAndroid.show("Invalid email", ToastAndroid.SHORT);
+            return;
+        }
+    
+        if (!password || password.trim() === "") {
+            ToastAndroid.show("Password cannot be empty", ToastAndroid.SHORT);
+            return;
+        }
+
         const userData = {
             email: email,
             password: password,
@@ -37,7 +48,10 @@ const LoginScreen = ({navigation}) => {
 
     return (
         <SafeAreaView style={styles.container}>
-            { isLoggedIn ? <Tabs/> : <ScrollView style={styles.ScrollView} keyboardShouldPersistTaps="always">
+            { isLoggedIn ? ( 
+                <Tabs/> 
+            ): (
+                <ScrollView style={styles.ScrollView} keyboardShouldPersistTaps="always">
                 <View style={styles.content}>
                     <Image
                         source={require('../../assets/login.png')}
@@ -84,7 +98,8 @@ const LoginScreen = ({navigation}) => {
                     </TouchableOpacity>
                     <Text style={styles.textSign} >Don't have an account? <Text style={styles.textColor2} onPress={()=>navigation.navigate("Register")}>Sign up</Text></Text>
                 </View>
-            </ScrollView>}
+            </ScrollView>
+            )}
         </SafeAreaView>
     );
 }

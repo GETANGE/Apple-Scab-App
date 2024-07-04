@@ -92,11 +92,9 @@ const styles= StyleSheet.create({
         marginLeft: 10,
         marginTop: 5,
         fontSize: 15,
-        color: 'grey',
         marginBottom: 10
     },
     textList:{
-        color: 'grey',
         fontSize: 15,
     }
 })

@@ -185,6 +185,7 @@ return (
                 </View>
 
                 {/* Upload Photo Buttons */}
+                <Text style={styles.profile3}>Instant analysis</Text>
                 <View style={styles.card2}>
                     {/* Take a photo button */}
                     <View style={styles.buttonContainer}>
@@ -224,7 +225,7 @@ const styles = StyleSheet.create({
     },
     card: {
         flexDirection: 'row', // Arrange children horizontally
-        backgroundColor: 'whitesmoke',
+        backgroundColor: 'green',
         padding: 20,
         borderRadius: 10,
         borderWidth: 1,
@@ -243,8 +244,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
     },
     text: {
-        fontSize: 16,
-        color: 'black',
+        fontSize: 18,
+        color: 'white',
         marginBottom: 10,
         marginLeft:10
     },
@@ -273,6 +274,14 @@ const styles = StyleSheet.create({
         marginTop:5,
         marginRight:210
     },
+    profile3:{
+        fontSize: 23,
+        fontWeight: 'bold',
+        color: 'green',
+        marginTop:5,
+        marginRight:210,
+        marginLeft: 2
+    },
     icon:{
         width:90,
         height:90,
@@ -295,7 +304,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         marginTop: 10,
-        marginBottom: 40
+        marginBottom: 15
     },
     buttonContainer: {
         flex: 1, // Take up equal space

@@ -4,7 +4,7 @@
     "slug": "apple-scab-app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "assets/appleaf.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
@@ -17,7 +17,8 @@
         {
           "photosPermission": "The app accesses your photos to let you share them with your friends."
         }
-      ]
+      ],
+      "expo-font"
     ],
     "assetBundlePatterns": [
       "**/*"
