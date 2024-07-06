@@ -16,7 +16,7 @@ export default function App() {
 
   async function getData() {
     try {
-      const data = await AsyncStorage.getItem('isLoggedIn');
+      const data = await AsyncStorage.getItem('isLocked');
       console.log('Data stored in AsyncStorage:', data);
       setIsLoggedIn(data === 'true'); // Parse data as boolean
     } catch (error) {
@@ -33,14 +33,13 @@ export default function App() {
       {isLoggedIn ? (
         <Tabs />
       ) : (
-        <Stack.Navigator screenOptions={{ 
-              headerShown:false,
-            }}>
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="Register" component={SignUp} />
           <Stack.Screen name="ResetPassword" component={ResetPassword} />
           <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
           <Stack.Screen name="CameraButton" component={CameraButton} />
+          <Stack.Screen name="Tabs" component={Tabs} />
         </Stack.Navigator>
       )}
     </NavigationContainer>

@@ -2,22 +2,20 @@ import React, { useState } from 'react';
 import { SafeAreaView, View, Text, Image, StyleSheet, TextInput, TouchableOpacity, ScrollView, ToastAndroid } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Tabs from '../components/Tabs';
 import axios from 'axios';
 
-const LoginScreen = ({navigation}) => {
+const LoginScreen = ({ navigation }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [isLoggedIn, setIsLogged] = useState(false);
 
-    function handleSubmit() {
+    const handleSubmit = async () => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
         if (!email || !emailRegex.test(email)) {
             ToastAndroid.show("Invalid email", ToastAndroid.SHORT);
             return;
         }
-    
+
         if (!password || password.trim() === "") {
             ToastAndroid.show("Password cannot be empty", ToastAndroid.SHORT);
             return;
@@ -27,30 +25,27 @@ const LoginScreen = ({navigation}) => {
             email: email,
             password: password,
         };
-        axios.post("https://apple-plant-disease.onrender.com/api/v1/user/login", userData)
-            .then(res => {
-                console.log(JSON.stringify(res.data, null, 2));
 
-                if (res.data.status === 'success') {
-                    ToastAndroid.show('Logged in successfully!', ToastAndroid.SHORT);
-                    AsyncStorage.setItem('token', res.data.token);
-                    AsyncStorage.setItem('isLocked', JSON.stringify(true));
-                    setIsLogged(true);
-                } else {
-                    ToastAndroid.show('Login failed. Please check your credentials.', ToastAndroid.SHORT);
-                }
-            })
-            .catch(error => {
-                console.log(error);
+        try {
+            const res = await axios.post("https://apple-plant-disease.onrender.com/api/v1/user/login", userData);
+            console.log(JSON.stringify(res.data, null, 2));
+
+            if (res.data.status === 'success') {
+                ToastAndroid.show('Logged in successfully!', ToastAndroid.SHORT);
+                await AsyncStorage.setItem('token', res.data.token);
+                await AsyncStorage.setItem('isLocked', 'true');
+                navigation.navigate('Tabs');
+            } else {
                 ToastAndroid.show('Login failed. Please check your credentials.', ToastAndroid.SHORT);
-            });
-    }
+            }
+        } catch (error) {
+            console.log(error);
+            ToastAndroid.show('Login failed. Please check your credentials.', ToastAndroid.SHORT);
+        }
+    };
 
     return (
         <SafeAreaView style={styles.container}>
-            { isLoggedIn ? ( 
-                <Tabs/> 
-            ): (
                 <ScrollView style={styles.ScrollView} keyboardShouldPersistTaps="always">
                 <View style={styles.content}>
                     <Image
@@ -99,7 +94,6 @@ const LoginScreen = ({navigation}) => {
                     <Text style={styles.textSign} >Don't have an account? <Text style={styles.textColor2} onPress={()=>navigation.navigate("Register")}>Sign up</Text></Text>
                 </View>
             </ScrollView>
-            )}
         </SafeAreaView>
     );
 }
@@ -108,8 +102,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fff',
-        // alignItems: 'center',
-        // justifyContent: 'center',
         width: '100%',
         height: '100%',
         
