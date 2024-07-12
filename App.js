@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
+import { SafeAreaView, View, Text, StyleSheet, ToastAndroid, ActivityIndicator } from "react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import SignUp from './src/screens/signUp';
 import Tabs from './src/components/Tabs';
 import LoginScreen from './src/screens/loginScreen';
@@ -12,21 +13,30 @@ import CameraButton from './src/components/cameraButton';
 const Stack = createStackNavigator();
 
 export default function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  async function getData() {
-    try {
-      const data = await AsyncStorage.getItem('isLocked');
-      console.log('Data stored in AsyncStorage:', data);
-      setIsLoggedIn(data === 'true'); // Parse data as boolean
-    } catch (error) {
-      console.error('Error reading data from AsyncStorage:', error);
-    }
-  }
+  const [isLoggedIn, setIsLoggedIn] = useState(null);
 
   useEffect(() => {
-    getData();
-  }, []); // Empty dependency array to run only once on mount
+    const checkLoginStatus = async () => {
+      try {
+        const isLocked = await AsyncStorage.getItem('isLocked');
+        console.log('isLocked:', isLocked); // Debugging log
+        setIsLoggedIn(isLocked === 'true');
+      } catch (error) {
+        console.error('Error reading data from AsyncStorage:', error);
+        setIsLoggedIn(false);
+      }
+    };
+
+    checkLoginStatus();
+  }, []);
+
+  if (isLoggedIn === null) {
+    return (
+      <SafeAreaView style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="green" />
+      </SafeAreaView>
+    ); // Loading spinner while checking login status
+  }
 
   return (
     <NavigationContainer>
@@ -45,3 +55,11 @@ export default function App() {
     </NavigationContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});

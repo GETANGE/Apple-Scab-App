@@ -7,6 +7,7 @@ import axios from 'axios';
 const LoginScreen = ({ navigation }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false); // Added loading state
 
     const handleSubmit = async () => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -27,20 +28,29 @@ const LoginScreen = ({ navigation }) => {
         };
 
         try {
+            // setLoading(true); // Set loading to true
             const res = await axios.post("https://apple-plant-disease.onrender.com/api/v1/user/login", userData);
             console.log(JSON.stringify(res.data, null, 2));
 
             if (res.data.status === 'success') {
                 ToastAndroid.show('Logged in successfully!', ToastAndroid.SHORT);
+                navigation.reset({
+                    index: 0,
+                    routes: [{ name: 'Tabs' }],
+                });
                 await AsyncStorage.setItem('token', res.data.token);
+                await AsyncStorage.setItem('userEmail', res.data.data.user.email);
+                await AsyncStorage.setItem('userName', res.data.data.user.name);
+                await AsyncStorage.setItem('userRole', res.data.data.user.role);
                 await AsyncStorage.setItem('isLocked', 'true');
-                navigation.navigate('Tabs');
             } else {
                 ToastAndroid.show('Login failed. Please check your credentials.', ToastAndroid.SHORT);
             }
         } catch (error) {
-            console.log(error);
+            console.error(error);
             ToastAndroid.show('Login failed. Please check your credentials.', ToastAndroid.SHORT);
+        } finally {
+            setLoading(false); // Set loading to false
         }
     };
 
