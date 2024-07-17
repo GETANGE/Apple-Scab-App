@@ -40,6 +40,7 @@ const LoginScreen = ({ navigation }) => {
                 });
                 await AsyncStorage.setItem('token', res.data.token);
                 await AsyncStorage.setItem('userEmail', res.data.data.user.email);
+                await AsyncStorage.setItem('id', res.data.data.user._id);
                 await AsyncStorage.setItem('userName', res.data.data.user.name);
                 await AsyncStorage.setItem('userRole', res.data.data.user.role);
                 await AsyncStorage.setItem('isLocked', 'true');

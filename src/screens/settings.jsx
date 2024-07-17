@@ -3,11 +3,14 @@ import { SafeAreaView, View, Text, StyleSheet, ToastAndroid } from "react-native
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CustomButton from "../components/CustomButton";
 import { FontAwesome5 } from '@expo/vector-icons';
+import axios from "axios";
 
 const Setting = ({ navigation }) => {
     const [email, setEmail] = useState('');
     const [username, setUsername] = useState('');
     const [role, setRole] = useState('');
+    const [userId, setUserId] = useState('');
+    const [token, setToken] = useState('');
     const [loading, setLoading] = useState(true);
 
     // Fetch user details from AsyncStorage
@@ -17,10 +20,14 @@ const Setting = ({ navigation }) => {
                 const email = await AsyncStorage.getItem('userEmail');
                 const username = await AsyncStorage.getItem('userName');
                 const role = await AsyncStorage.getItem('userRole');
+                const userId = await AsyncStorage.getItem('id');
+                const token = await AsyncStorage.getItem('token');
 
                 if (email !== null) setEmail(email);
                 if (username !== null) setUsername(username);
                 if (role !== null) setRole(role);
+                if (userId !== null) setUserId(userId);
+                if (token !== null) setToken(token);
             } catch (error) {
                 console.error('Error fetching user details', error);
             } finally {
@@ -39,16 +46,49 @@ const Setting = ({ navigation }) => {
                 index: 0,
                 routes: [{ name: 'Login' }],  
         });
-            await AsyncStorage.removeItem('isLocked');
-            await AsyncStorage.removeItem('token');
-            await AsyncStorage.removeItem('userEmail');
-            await AsyncStorage.removeItem('userName');
-            await AsyncStorage.removeItem('userRole');
+            await AsyncStorage.multiRemove(['isLocked', 'token', 'userEmail', 'userName', 'userRole', 'id']);
         } catch (error) {
             console.error('Error during logout', error);
             ToastAndroid.show('Error during logout', ToastAndroid.SHORT);
         }
     };
+
+    // Function to delete the account
+    const deleteAccount = async () => {
+        try {
+
+            if (!token) {
+                ToastAndroid.show('User is not authenticated', ToastAndroid.SHORT);
+                return;
+            }
+    
+            const response = await axios.delete(`https://apple-plant-disease.onrender.com/api/v1/user/softDelete/${userId}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+            });
+    
+            if (response.data.status === 'success') {
+                ToastAndroid.show('Account deleted successfully!', ToastAndroid.SHORT);
+    
+                // Remove all stored user information
+                await AsyncStorage.multiRemove(['isLocked', 'token', 'userEmail', 'userName', 'userRole', 'id']);
+    
+                // Navigate to Login screen
+                navigation.reset({
+                    index: 0,
+                    routes: [{ name: 'Login' }],
+                });
+            } else {
+                ToastAndroid.show('Error deleting account', ToastAndroid.SHORT);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            ToastAndroid.show('Error deleting account', ToastAndroid.SHORT);
+        }
+    };
+    
 
     return (
         <SafeAreaView style={styles.container}>
@@ -83,7 +123,7 @@ const Setting = ({ navigation }) => {
                                 buttonText="Log Out"
                             />
                             <CustomButton
-                                onPress={() => console.log('Account Deleted..')}
+                                onPress={deleteAccount}
                                 buttonText="Delete Account"
                                 style={styles.button}
                             />
