@@ -1,12 +1,19 @@
 import React ,{ useState, useEffect, useRef }from 'react';
-import { SafeAreaView, View, Text, StyleSheet , Image, Pressable, Modal, ToastAndroid, TouchableOpacity} from 'react-native';
+import { Modal, View, Text, StyleSheet , Image, ToastAndroid, TouchableOpacity} from 'react-native';
 import { Camera, CameraType} from 'expo-camera';
 import * as MediaLibrary from 'expo-media-library';
 import Button from './Button';
+import axios from 'axios';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function TakePicture(){
     const [hasCameraPermision, setHasCameraPermision]= useState(null);
     const [image, setImage] = useState(null);
+    const [showModal, setShowModal] = useState(false);
+    const [predicted, setPredicted] = useState('');
+    const [confidence, setConfidence] = useState(null);
+    const [disease, setDiseaseData] = useState(false);
+    const [recommend, setRecommendData] = useState(false);
     const [type, setType] = useState(Camera.Constants.Type.back);
     const [flash, setFlash] = useState(Camera.Constants.FlashMode.off);
     const cameraRef = useRef(null);
@@ -22,7 +29,11 @@ export default function TakePicture(){
     const takePicture = async function(){
         if(cameraRef){
             try{
-                const data = await cameraRef.current.takePictureAsync();
+                const options = {
+                    quality: 0.5,
+                    ratio: '3:3'
+                };
+                const data = await cameraRef.current.takePictureAsync(options);
                 console.log(data);
                 setImage(data.uri);
             }catch{
@@ -30,25 +41,127 @@ export default function TakePicture(){
             }
         }
     }
-
-    const saveImage = async function(){
-        if(image){
-            try{
-                await MediaLibrary.createAssetAsync(image);
-                alert('Picture saved successfully 🥳')
-                setImage(null);
-            }catch{
-                console.log('Error saving image');
-            }
-        }
-    }
+    
 
     if(hasCameraPermision === false){
         return <Text>No camera permision</Text>
     }
 
+    const saveImage = async function(){
+        if(image){
+            setShowModal(true)
+            try{
+                const mimeType = 'image/jpeg';
+
+                const formData = new FormData();
+                formData.append('file', {
+                    uri: image,
+                    type: mimeType,
+                    name: 'apple.jpg',
+                });
+
+                const config = {
+                    method: 'post',
+                    url: `https://scab-model.onrender.com/predict`,
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    },
+                    data: formData
+                };
+
+                const response = await axios(config);
+                console.log(JSON.stringify(response.data, null, 2));
+
+                // Store the API response data in the state
+                if (response.data && response.data.Predicted && response.data.confidence !== undefined) {
+                    setPredicted(response.data.Predicted);                    
+                    setConfidence(response.data.confidence);
+                
+                    if(response.data.Predicted.length === 10){
+                        // Calling the second API
+                        const diseaseDataPayload = {
+                                diseases: disease
+                            };
+                
+                        axios.get('https://apple-plant-disease.onrender.com/api/v1/disease', diseaseDataPayload)
+                            .then(res => {
+                                if (res.data.status === 'success') {
+                                    const data = res.data.data.diseases[1];
+                                    setDiseaseData(data);
+                
+                                    function getRandomItem(array){
+                                        const randomIndex = Math.floor(Math.random()*array.length);
+                                        return array[randomIndex];
+                                    }
+                
+                                    const randomItem= getRandomItem(data.treatment);
+                                    console.log(JSON.stringify(randomItem, null, 2));
+                                    setRecommendData(randomItem);
+                                }
+                            })
+                            .catch(err => {
+                                console.log("Error is:", err);
+                            });
+                        }
+                }else{
+                    console.log('Image capturing failed');
+                }
+            }catch(err){
+                console.log('Error saving image', err);
+            }
+        }
+    }
+
+    const closeModal=()=>{
+        setDiseaseData('');
+        setPredicted('');
+        setConfidence('');
+        setImage(null)
+        setShowModal(!showModal);
+    }
+
     return(
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
+            <View style={styles.container}>
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={showModal}
+                onRequestClose={() => {
+                    ToastAndroid.show("Modal has been closed.", ToastAndroid.SHORT)
+                    setShowModal(!showModal);
+                }}
+            >
+                <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                        {image && <Image source={{ uri: image }} style={{width: 300, height:200, borderRadius: 10}} />}
+                        <TouchableOpacity
+                            style={[styles.buttonModal, styles.buttonClose]}
+                            onPress={closeModal}
+                        >
+                            <Text style={styles.textStyle}>Close</Text>
+                        </TouchableOpacity>
+                        <Text style={styles.prediction}>Predicted:<Text style={styles.predict}>{predicted}</Text></Text>
+                        <Text style={styles.prediction}>Confidence:<Text style={styles.predicting}>{confidence}</Text></Text>
+
+                        {disease && (
+                            <>
+                                <Text style={styles.prediction}>Description:<Text style={styles.predict}> {disease.description}</Text></Text>
+                                <Text style={styles.prediction}>Symptoms:</Text>
+                                {disease.symptoms.map((symptom, index) => (
+                                    <Text key={index}>- {symptom}</Text>
+                                ))}
+                                <Text style={styles.prediction}>Recomendation:<Text style={styles.predict}> {recommend}</Text></Text>
+                            </>
+                        )}
+                    </View>
+                </View>
+            </Modal>
+
+            {showModal && (
+                <View style={styles.faintTint}/>
+            )}
+
             {!image ?
                 <Camera
                     style={styles.camera}
@@ -95,6 +208,8 @@ export default function TakePicture(){
             }
             </View>
         </View>
+        </SafeAreaView>
+
     )
 }
 
@@ -108,5 +223,65 @@ const styles = StyleSheet.create({
     camera:{
         flex: 1,
         borderRadius: 20
-    }
+    },
+    centeredView: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 22,
+    },
+    modalView: {
+        margin: 20,
+        backgroundColor: 'white',
+        borderRadius: 20,
+        padding: 35,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+        height: 580,
+        width: 330,
+    },
+    modalText: {
+        marginBottom: 15,
+        textAlign: 'center',
+    },
+    faintTint: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: 'rgba(0, 0, 0, 0.7)', // Semi-transparent black background
+        zIndex: 6, // Ensure the tint is behind the modal
+    },
+    prediction:{
+        color:'green',
+    },
+    predict:{
+        color:'black',
+    },
+    predicting:{
+        color:'red',
+    },
+    buttonModal: {
+        borderRadius: 20,
+        padding: 10,
+        elevation: 2,
+    },
+    buttonClose: {
+        backgroundColor: 'green', 
+        borderRadius: 5, 
+        padding: 10, 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height:39,
+        width: 100,
+    },
+    textStyle: {
+        color: 'white',
+        fontWeight: 'bold',
+        textAlign: 'center',
+    },
 })

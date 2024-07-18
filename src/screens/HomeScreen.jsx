@@ -1,8 +1,9 @@
 import React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { SafeAreaView, View, Text, StyleSheet , Image, Pressable, Modal, ToastAndroid, TouchableOpacity} from 'react-native';
 import { SimpleLineIcons, AntDesign, Fontisto, Foundation, FontAwesome5} from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 
 const Home = ({navigation}) => {
@@ -12,6 +13,21 @@ const Home = ({navigation}) => {
     const [confidence, setConfidence] = useState(null);
     const [disease, setDiseaseData] = useState(false);
     const [recommend, setRecommendData] = useState(false);
+    const [username, setUsername] = useState('');
+
+        // Fetch user details from AsyncStorage
+        useEffect(() => {
+            const fetchUserDetails = async () => {
+                try {
+                    const username = await AsyncStorage.getItem('userName');
+                    if (username !== null) setUsername(username);
+                } catch (error) {
+                    console.error('Error fetching user details', error);
+                }
+            };
+    
+            fetchUserDetails();
+        }, []);
 
     // Function to pick image from gallery
     const pickImageAsync = async () => {
@@ -144,7 +160,7 @@ return (
                 <View style={styles.faintTint}/>
             )}
 
-            <Text style={styles.profile}>Hello, Emmanuel</Text>
+            <Text style={styles.profile}>Hello, {username}</Text>
             <View style={styles.content}>
                 {/* Home Card */}
                 <View style={styles.card}>
