@@ -5,29 +5,33 @@ import { SimpleLineIcons, AntDesign, Fontisto, Foundation, FontAwesome5} from '@
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+// import ErrorModal from '../components/errorModal';
 
-const Home = ({navigation}) => {
+const Home = ({ navigation }) => {
+    const [username, setUsername] = useState('');
     const [selectedImage, setSelectedImage] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [predicted, setPredicted] = useState('');
     const [confidence, setConfidence] = useState(null);
-    const [disease, setDiseaseData] = useState(false);
-    const [recommend, setRecommendData] = useState(false);
-    const [username, setUsername] = useState('');
+    const [disease, setDiseaseData] = useState(null);
+    const [recommend, setRecommendData] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-        // Fetch user details from AsyncStorage
-        useEffect(() => {
-            const fetchUserDetails = async () => {
-                try {
-                    const username = await AsyncStorage.getItem('userName');
-                    if (username !== null) setUsername(username);
-                } catch (error) {
-                    console.error('Error fetching user details', error);
-                }
-            };
-    
-            fetchUserDetails();
-        }, []);
+    // Fetch user details from AsyncStorage
+    useEffect(() => {
+        const fetchUserDetails = async () => {
+            try {
+                const username = await AsyncStorage.getItem('userName');
+                if (username !== null) setUsername(username);
+            } catch (error) {
+                console.error('Error fetching user details', error);
+            } finally {
+                setLoading(false); // Set loading to false once the fetching is done
+            }
+        };
+
+        fetchUserDetails();
+    }, []);
 
     // Function to pick image from gallery
     const pickImageAsync = async () => {
@@ -39,8 +43,6 @@ const Home = ({navigation}) => {
                 quality: 0.5,
             });
 
-            console.log(JSON.stringify(result));
-
             if (!result.canceled) {
                 setSelectedImage(result.assets[0].uri);
                 setShowModal(true);
@@ -51,73 +53,80 @@ const Home = ({navigation}) => {
                     return;
                 }
 
-                console.log("Image has been selected");
                 const formData = new FormData();
-
                 formData.append('file', {
                     uri: uri,
                     type: result.assets[0].mimeType,
                     name: "apple.png",
                 });
 
-                const config = {
-                    method: 'post',
-                    url: `https://scab-model.onrender.com/predict`,
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    },
-                    data: formData
-                };
+                // First API call
+                try {
+                    const response = await axios.post('https://scab-model.onrender.com/predict', formData, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data',
+                        },
+                    });
 
-                const response = await axios(config);
-                console.log(JSON.stringify(response.data, null, 2));
+                    if (response.data && response.data.Predicted && response.data.confidence !== undefined) {
+                        setPredicted(response.data.Predicted);
+                        setConfidence(response.data.confidence);
 
-                // Store the API response data in the state
-                if (response.data && response.data.Predicted && response.data.confidence !== undefined) {
-                    setPredicted(response.data.Predicted);                    
-                    setConfidence(response.data.confidence);
+                        if (response.data.Predicted.length === 10) {
+                            // Second API call
+                            try {
+                                const res = await axios.get('https://apple-plant-disease.onrender.com/api/v1/disease', {
+                                    params: {
+                                        diseases: disease,
+                                    },
+                                });
 
-                    if(response.data.Predicted.length === 10){
-                        // Calling the second API
-                        const diseaseDataPayload = {
-                            diseases: disease
-                        };
-
-                        axios.get('https://apple-plant-disease.onrender.com/api/v1/disease', diseaseDataPayload)
-                            .then(res => {
                                 if (res.data.status === 'success') {
                                     const data = res.data.data.diseases[1];
                                     setDiseaseData(data);
 
-                                    function getRandomItem(array){
-                                        const randomIndex = Math.floor(Math.random()*array.length);
+                                    function getRandomItem(array) {
+                                        const randomIndex = Math.floor(Math.random() * array.length);
                                         return array[randomIndex];
                                     }
 
-                                    const randomItem= getRandomItem(data.treatment);
-                                    console.log(JSON.stringify(randomItem, null, 2));
+                                    const randomItem = getRandomItem(data.treatment);
                                     setRecommendData(randomItem);
                                 }
-                            })
-                            .catch(err => {
-                                console.log("Error is:", err);
-                            });
+                            } catch (err) {
+                                console.error("Error fetching disease data:", err);
+                                ToastAndroid.show("Error occurred while fetching disease data", ToastAndroid.SHORT);
+                            }
                         }
+                    }
+                } catch (error) {
+                    if (axios.isAxiosError(error)) {
+                        const statusCode = error.response?.status;
+                        if (statusCode === 502 || statusCode === 503) {
+                            ToastAndroid.show("Error occurred while fetching disease data", ToastAndroid.SHORT);
+                        } else {
+                            ToastAndroid.show("An unexpected error occurred", ToastAndroid.SHORT);
+                        }
+                    } else {
+                        console.error('Non-Axios error:', error);
+                        ToastAndroid.show("An unexpected error occurred", ToastAndroid.SHORT);
+                    }
                 }
             } else {
                 console.log('Image selection cancelled');
             }
         } catch (error) {
             console.log('Error:', error);
+            ToastAndroid.show("An unexpected error occurred", ToastAndroid.SHORT);
         }
     };
 
-    const closeModal=()=>{
-        setDiseaseData('');
+    const closeModal = () => {
+        setDiseaseData(null);
         setPredicted('');
-        setConfidence('');
+        setConfidence(null);
         setShowModal(!showModal);
-    }
+    };
 
 return (
         <SafeAreaView style={styles.container}>
@@ -247,7 +256,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: 'green',
         width: 350,
-        height:150
+        height:160
     },
     card2:{
         backgroundColor: 'whitesmoke',

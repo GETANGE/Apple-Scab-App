@@ -3,6 +3,7 @@ import { Modal, View, Text, StyleSheet , Image, ToastAndroid, TouchableOpacity} 
 import { Camera, CameraType} from 'expo-camera';
 import * as MediaLibrary from 'expo-media-library';
 import Button from './Button';
+// import ErrorModal from './errorModal';
 import axios from 'axios';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -104,7 +105,11 @@ export default function TakePicture(){
                             });
                         }
                 }else{
-                    console.log('Image capturing failed');
+                    // <ErrorModal
+                    //     visible={modalVisible}
+                    //     onClose={() => setModalVisible(false)}
+                    //     errorMessage= "This is not an apple leaf"
+                    // />
                 }
             }catch(err){
                 console.log('Error saving image', err);
