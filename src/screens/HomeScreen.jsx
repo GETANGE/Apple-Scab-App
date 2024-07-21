@@ -1,33 +1,37 @@
-import React from 'react';
-import { useState, useEffect } from 'react';
-import { SafeAreaView, View, Text, StyleSheet , Image, Pressable, Modal, ToastAndroid, TouchableOpacity} from 'react-native';
-import { SimpleLineIcons, AntDesign, Fontisto, Foundation, FontAwesome5} from '@expo/vector-icons';
+import React, { useState, useEffect } from 'react';
+import { SafeAreaView, View, Text, StyleSheet, Image, Pressable, Modal, ToastAndroid, TouchableOpacity } from 'react-native';
+import { SimpleLineIcons, AntDesign, Fontisto, Foundation, FontAwesome5 } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-// import ErrorModal from '../components/errorModal';
+import ErrorModal from '../components/errorModal';
 
 const Home = ({ navigation }) => {
-    const [username, setUsername] = useState('');
     const [selectedImage, setSelectedImage] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [predicted, setPredicted] = useState('');
     const [confidence, setConfidence] = useState(null);
     const [disease, setDiseaseData] = useState(null);
     const [recommend, setRecommendData] = useState(null);
+    const [username, setUsername] = useState('');
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState({ isVisible: false, message: '' });
+
+    const showError = (message) => {
+        setError({ isVisible: true, message });
+    };
 
     // Fetch user details from AsyncStorage
     useEffect(() => {
         const fetchUserDetails = async () => {
-            try {
-                const username = await AsyncStorage.getItem('userName');
-                if (username !== null) setUsername(username);
-            } catch (error) {
-                console.error('Error fetching user details', error);
-            } finally {
-                setLoading(false); // Set loading to false once the fetching is done
-            }
+        try {
+            const username = await AsyncStorage.getItem('userName');
+            if (username !== null) setUsername(username);
+        } catch (error) {
+            console.error('Error fetching user details', error);
+        } finally {
+            setLoading(false); // Set loading to false once the fetching is done
+        }
         };
 
         fetchUserDetails();
@@ -43,81 +47,81 @@ const Home = ({ navigation }) => {
                 quality: 0.5,
             });
 
-            if (!result.canceled) {
-                setSelectedImage(result.assets[0].uri);
-                setShowModal(true);
+        if (!result.canceled) {
+            setSelectedImage(result.assets[0].uri);
+            setShowModal(true);
 
-                const { uri } = result.assets[0];
+            const { uri } = result.assets[0];
                 if (!uri) {
-                    console.warn('No image URI found in the result');
-                    return;
-                }
+                console.warn('No image URI found in the result');
+                return;
+            }
 
-                const formData = new FormData();
-                formData.append('file', {
-                    uri: uri,
-                    type: result.assets[0].mimeType,
-                    name: "apple.png",
+            const formData = new FormData();
+            formData.append('file', {
+                uri: uri,
+                type: result.assets[0].mimeType,
+                name: "apple.png",
+            });
+
+            // First API call
+            try {
+                const response = await axios.post('https://scab-model.onrender.com/predict', formData, {
+                    headers: {
+                    'Content-Type': 'multipart/form-data',
+                    },
                 });
 
-                // First API call
-                try {
-                    const response = await axios.post('https://scab-model.onrender.com/predict', formData, {
-                        headers: {
-                            'Content-Type': 'multipart/form-data',
-                        },
-                    });
+                if (response.data && response.data.Predicted && response.data.confidence !== undefined) {
+                    setPredicted(response.data.Predicted);
+                    setConfidence(response.data.confidence);
 
-                    if (response.data && response.data.Predicted && response.data.confidence !== undefined) {
-                        setPredicted(response.data.Predicted);
-                        setConfidence(response.data.confidence);
+                    if (response.data.Predicted.length === 10) {
+                    // Second API call
+                    try {
+                        const res = await axios.get('https://apple-plant-disease.onrender.com/api/v1/disease', {
+                            params: {
+                                diseases: response.data.Predicted,
+                            },
+                        });
 
-                        if (response.data.Predicted.length === 10) {
-                            // Second API call
-                            try {
-                                const res = await axios.get('https://apple-plant-disease.onrender.com/api/v1/disease', {
-                                    params: {
-                                        diseases: disease,
-                                    },
-                                });
+                        if (res.data.status === 'success') {
+                        const data = res.data.data.diseases[1];
+                        setDiseaseData(data);
 
-                                if (res.data.status === 'success') {
-                                    const data = res.data.data.diseases[1];
-                                    setDiseaseData(data);
-
-                                    function getRandomItem(array) {
-                                        const randomIndex = Math.floor(Math.random() * array.length);
-                                        return array[randomIndex];
-                                    }
-
-                                    const randomItem = getRandomItem(data.treatment);
-                                    setRecommendData(randomItem);
-                                }
-                            } catch (err) {
-                                console.error("Error fetching disease data:", err);
-                                ToastAndroid.show("Error occurred while fetching disease data", ToastAndroid.SHORT);
-                            }
+                        function getRandomItem(array) {
+                            const randomIndex = Math.floor(Math.random() * array.length);
+                            return array[randomIndex];
                         }
+
+                        const randomItem = getRandomItem(data.treatment);
+                        setRecommendData(randomItem);
+                        }
+                    } catch (err) {
+                        console.error("Error fetching disease data:", err);
+                        showError("Error occurred while fetching disease data");
                     }
-                } catch (error) {
-                    if (axios.isAxiosError(error)) {
-                        const statusCode = error.response?.status;
-                        if (statusCode === 502 || statusCode === 503) {
-                            ToastAndroid.show("Error occurred while fetching disease data", ToastAndroid.SHORT);
-                        } else {
-                            ToastAndroid.show("An unexpected error occurred", ToastAndroid.SHORT);
-                        }
-                    } else {
-                        console.error('Non-Axios error:', error);
-                        ToastAndroid.show("An unexpected error occurred", ToastAndroid.SHORT);
                     }
                 }
+            } catch (error) {
+            if (axios.isAxiosError(error)) {
+                const statusCode = error.response?.status;
+                if (statusCode === 502 || statusCode === 503) {
+                    showError("This is not an apple leaf. Please try again later.");
+                } else {
+                    showError("An unexpected error occurred");
+                }
             } else {
-                console.log('Image selection cancelled');
+                console.error('Non-Axios error:', error);
+                    showError("An unexpected error occurred");
             }
+            }
+        } else {
+            console.log('Image selection cancelled');
+        }
         } catch (error) {
-            console.log('Error:', error);
-            ToastAndroid.show("An unexpected error occurred", ToastAndroid.SHORT);
+        console.log('Error:', error);
+        showError("An unexpected error occurred");
         }
     };
 
@@ -127,6 +131,10 @@ const Home = ({ navigation }) => {
         setConfidence(null);
         setShowModal(!showModal);
     };
+
+    const closeModalError = () =>{
+        setError({ isVisible: false, message: '' });
+    }
 
 return (
         <SafeAreaView style={styles.container}>
@@ -169,13 +177,13 @@ return (
                 <View style={styles.faintTint}/>
             )}
 
-            <Text style={styles.profile}>Hello, {username}</Text>
+            <Text style={styles.profile}>Hello, {username} 🥳</Text>
             <View style={styles.content}>
                 {/* Home Card */}
                 <View style={styles.card}>
                     <View style={styles.homeCard}>
-                        <Text style={styles.text}>Welcome to Apple-apple-scab Disease detection system!</Text>
-                        <Text style={styles.text}>Upload or snap an Image for instant analysis. Let's grow together</Text>
+                        <Text style={styles.text}>Welcome to Apple-apple-scab Disease detection system!  🌴</Text>
+                        <Text style={styles.text}>Upload or snap an Image for instant analysis. Let's grow together 🌱</Text>
                     </View>
                     <View>
                         <Image
@@ -186,7 +194,7 @@ return (
                 </View>
 
                 {/* Button Icons */}
-                <Text style={styles.profile2}>Heal your crops</Text>
+                <Text style={styles.profile2}>Heal your crops 🌾</Text>
                 <View style={styles.iconInputContainer}>
                     {/* Take a picture */}
                     <View style={styles.icon}>
@@ -198,7 +206,7 @@ return (
                     {/* See a diagnosis */}
                     <View style={styles.icon}>
                         <Fontisto name="test-tube" size={24} color="green" />
-                        <Text>See a diagnosis</Text>
+                        <Text>See a diagnosis </Text>
                     </View>
                     <AntDesign name="arrowright" size={20} color="black" />
 
@@ -210,7 +218,7 @@ return (
                 </View>
 
                 {/* Upload Photo Buttons */}
-                <Text style={styles.profile3}>Instant analysis</Text>
+                <Text style={styles.profile3}>Instant analysis </Text>
                 <View style={styles.card2}>
                     {/* Take a photo button */}
                     <View style={styles.buttonContainer}>
@@ -229,6 +237,11 @@ return (
                     </View>
                 </View>
             </View>
+            <ErrorModal
+                isVisible={error.isVisible}
+                errorMessage={error.message}
+                onClose={ closeModalError}
+            />
         </SafeAreaView>
     );
 }

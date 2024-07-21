@@ -5,13 +5,13 @@ import Modal from 'react-native-modal';
 const ErrorModal = ({ isVisible, errorMessage, onClose }) => {
     return (
         <Modal isVisible={isVisible} onBackdropPress={onClose} onBackButtonPress={onClose}>
-        <View style={styles.modalContainer}>
-            <Text style={styles.errorTitle}>Error</Text>
-            <Text style={styles.errorMessage}>{errorMessage}</Text>
-            <TouchableOpacity style={styles.button} onPress={onClose}>
-            <Text style={styles.buttonText}>Close</Text>
-            </TouchableOpacity>
-        </View>
+            <View style={styles.modalContainer}>
+                <Text style={styles.errorTitle}>Error ❌</Text>
+                <Text style={styles.errorMessage}>{errorMessage} 😢</Text>
+                <TouchableOpacity style={styles.button} onPress={onClose}>
+                <Text style={styles.buttonText}>Close</Text>
+                </TouchableOpacity>
+            </View>
         </Modal>
     );
 };
