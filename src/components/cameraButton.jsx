@@ -3,7 +3,7 @@ import { Modal, View, Text, StyleSheet , Image, ToastAndroid, TouchableOpacity} 
 import { Camera, CameraType} from 'expo-camera';
 import * as MediaLibrary from 'expo-media-library';
 import Button from './Button';
-// import ErrorModal from './errorModal';
+import ErrorModal from './errorModal';
 import axios from 'axios';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -17,7 +17,12 @@ export default function TakePicture(){
     const [recommend, setRecommendData] = useState(false);
     const [type, setType] = useState(Camera.Constants.Type.back);
     const [flash, setFlash] = useState(Camera.Constants.FlashMode.off);
+    const [error, setError] = useState({ isVisible: false, message: '' });
     const cameraRef = useRef(null);
+
+    const showError = (message) => {
+        setError({ isVisible: true, message });
+    };
 
     useEffect(()=>{
         (async () => {
@@ -49,71 +54,83 @@ export default function TakePicture(){
     }
 
     const saveImage = async function(){
-        if(image){
-            setShowModal(true)
-            try{
-                const mimeType = 'image/jpeg';
+        try{
+            if(image){
+                setShowModal(true)
+                try{
+                    const mimeType = 'image/jpeg';
+    
+                    const formData = new FormData();
+                    formData.append('file', {
+                        uri: image,
+                        type: mimeType,
+                        name: 'apple.jpg',
+                    });
+    
+                    const config = {
+                        method: 'post',
+                        url: `https://scab-model.onrender.com/predict`,
+                        headers: {
+                            'Content-Type': 'multipart/form-data'
+                        },
+                        data: formData
+                    };
+    
+                    const response = await axios(config);
+                    console.log(JSON.stringify(response.data, null, 2));
+    
+                    // Store the API response data in the state
+                    if (response.data && response.data.Predicted && response.data.confidence !== undefined) {
+                        setPredicted(response.data.Predicted);                    
+                        setConfidence(response.data.confidence);
+                    
+                        if(response.data.Predicted.length === 10){
+                                try{
+                                    // Calling the second API
+                                    const diseaseDataPayload = {
+                                        diseases: disease
+                                    };
+                        
+                                axios.get('https://apple-plant-disease.onrender.com/api/v1/disease', diseaseDataPayload)
+                                    .then(res => {
+                                        if (res.data.status === 'success') {
+                                            const data = res.data.data.diseases[1];
+                                            setDiseaseData(data);
+                        
+                                            function getRandomItem(array){
+                                                const randomIndex = Math.floor(Math.random()*array.length);
+                                                return array[randomIndex];
+                                            }
+                        
+                                            const randomItem= getRandomItem(data.treatment);
+                                            console.log(JSON.stringify(randomItem, null, 2));
+                                            setRecommendData(randomItem);
+                                        }
+                                    })
+                                    .catch(err => {
+                                        console.log("Error is:", err);
+                                        showError("Error occured while fetching data")
+                                    });
+                                }catch(e){
 
-                const formData = new FormData();
-                formData.append('file', {
-                    uri: image,
-                    type: mimeType,
-                    name: 'apple.jpg',
-                });
-
-                const config = {
-                    method: 'post',
-                    url: `https://scab-model.onrender.com/predict`,
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    },
-                    data: formData
-                };
-
-                const response = await axios(config);
-                console.log(JSON.stringify(response.data, null, 2));
-
-                // Store the API response data in the state
-                if (response.data && response.data.Predicted && response.data.confidence !== undefined) {
-                    setPredicted(response.data.Predicted);                    
-                    setConfidence(response.data.confidence);
-                
-                    if(response.data.Predicted.length === 10){
-                        // Calling the second API
-                        const diseaseDataPayload = {
-                                diseases: disease
-                            };
-                
-                        axios.get('https://apple-plant-disease.onrender.com/api/v1/disease', diseaseDataPayload)
-                            .then(res => {
-                                if (res.data.status === 'success') {
-                                    const data = res.data.data.diseases[1];
-                                    setDiseaseData(data);
-                
-                                    function getRandomItem(array){
-                                        const randomIndex = Math.floor(Math.random()*array.length);
-                                        return array[randomIndex];
-                                    }
-                
-                                    const randomItem= getRandomItem(data.treatment);
-                                    console.log(JSON.stringify(randomItem, null, 2));
-                                    setRecommendData(randomItem);
                                 }
-                            })
-                            .catch(err => {
-                                console.log("Error is:", err);
-                            });
+                            }
+                    }
+                }catch(error){
+                    if(axios.isAxiosError(error)){
+                        const statusCode = error.response?.status;
+                        if(statusCode === 502 || statusCode === 503){
+                            showError("This is not an apple leaf. Please try again later.");
+                        }else{
+                            showError("An unexpected error occurred");
                         }
-                }else{
-                    // <ErrorModal
-                    //     visible={modalVisible}
-                    //     onClose={() => setModalVisible(false)}
-                    //     errorMessage= "This is not an apple leaf"
-                    // />
+                    }else{
+                        showError("An unexpected error occurred while saving")
+                    }
                 }
-            }catch(err){
-                console.log('Error saving image', err);
             }
+        }catch(err){
+            showError("An error occurred while saving")
         }
     }
 
@@ -123,6 +140,10 @@ export default function TakePicture(){
         setConfidence('');
         setImage(null)
         setShowModal(!showModal);
+    }
+
+    const closeModalError = () =>{
+        setError({ isVisible: false, message: '' });
     }
 
     return(
@@ -213,6 +234,11 @@ export default function TakePicture(){
             }
             </View>
         </View>
+        <ErrorModal
+                isVisible={error.isVisible}
+                errorMessage={error.message}
+                onClose={ closeModalError}
+            />
         </SafeAreaView>
 
     )
